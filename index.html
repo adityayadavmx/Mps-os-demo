@@ -1,0 +1,1344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IndianPol — MP Operating System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Newsreader:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0A1119;
+  --bg-elev:#0E1826;
+  --panel:#121F30;
+  --panel-hover:#17283D;
+  --border:#213247;
+  --border-soft:#182534;
+  --text:#EAF0F6;
+  --text-dim:#8FA2B8;
+  --text-faint:#54607A;
+  --teal:#33CE9F;
+  --teal-dim:rgba(51,206,159,.13);
+  --gold:#CBA24E;
+  --gold-dim:rgba(203,162,78,.15);
+  --red:#E4695D;
+  --red-dim:rgba(228,105,93,.14);
+  --blue:#5D93F2;
+  --blue-dim:rgba(93,147,242,.13);
+  --radius:7px;
+  --radius-sm:4px;
+  --sans:'IBM Plex Sans',-apple-system,sans-serif;
+  --mono:'IBM Plex Mono',monospace;
+  --serif:'Newsreader',serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--sans);
+  font-size:13.5px;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+::selection{background:var(--teal-dim);color:var(--teal);}
+::-webkit-scrollbar{width:8px;height:8px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+a{color:inherit;text-decoration:none;}
+button{font-family:inherit;cursor:pointer;}
+input,select,textarea{font-family:inherit;font-size:inherit;color:var(--text);}
+
+/* ---------- APP SHELL ---------- */
+#app{display:flex;height:100vh;overflow:hidden;}
+
+/* SIDEBAR */
+#sidebar{
+  width:236px;flex:none;background:var(--bg-elev);
+  border-right:1px solid var(--border-soft);
+  display:flex;flex-direction:column;
+  height:100vh;
+}
+.brand{
+  padding:18px 18px 14px 18px;
+  border-bottom:1px solid var(--border-soft);
+}
+.brand-mark{display:flex;align-items:center;gap:9px;}
+.brand-glyph{
+  width:26px;height:26px;border-radius:6px;
+  background:linear-gradient(155deg,#1B2E45,#0E1826);
+  border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--serif);font-style:italic;font-size:14px;color:var(--gold);
+}
+.brand-name{font-weight:600;font-size:14.5px;letter-spacing:.01em;}
+.brand-sub{font-size:10.5px;color:var(--text-faint);margin-top:2px;padding-left:1px;}
+.demo-chip{
+  margin-top:10px;display:inline-flex;align-items:center;gap:5px;
+  background:var(--gold-dim);color:var(--gold);border:1px solid rgba(203,162,78,.3);
+  padding:3px 8px;border-radius:20px;font-size:10px;font-weight:500;
+}
+.demo-chip::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--gold);}
+
+.nav-scroll{flex:1;overflow-y:auto;padding:10px 10px;}
+.nav-group-label{font-size:10px;color:var(--text-faint);padding:12px 10px 6px;font-weight:500;}
+.nav-item{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 10px;border-radius:var(--radius-sm);
+  color:var(--text-dim);font-size:13px;cursor:pointer;
+  border:1px solid transparent;
+}
+.nav-item:hover{background:var(--panel-hover);color:var(--text);}
+.nav-item.active{background:var(--panel);color:var(--text);border-color:var(--border);}
+.nav-item.active .nav-dot{background:var(--teal);}
+.nav-dot{width:5px;height:5px;border-radius:50%;background:var(--text-faint);flex:none;}
+.nav-item .nav-badge{
+  margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--text-faint);
+  background:var(--bg);border:1px solid var(--border-soft);padding:1px 6px;border-radius:10px;
+}
+.nav-item.active .nav-badge{color:var(--teal);border-color:rgba(51,206,159,.3);}
+
+.sidebar-footer{padding:12px;border-top:1px solid var(--border-soft);}
+.role-box{
+  background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-sm);
+  padding:8px 10px;
+}
+.role-box label{display:block;font-size:9.5px;color:var(--text-faint);margin-bottom:4px;}
+.role-box select{
+  width:100%;background:transparent;border:none;color:var(--text);font-size:12.5px;font-weight:500;
+  outline:none;
+}
+.role-box select option{background:var(--panel);}
+
+/* MAIN */
+#main-wrap{flex:1;display:flex;flex-direction:column;height:100vh;overflow:hidden;}
+#topbar{
+  height:56px;flex:none;border-bottom:1px solid var(--border-soft);
+  display:flex;align-items:center;gap:16px;padding:0 20px;background:var(--bg);
+}
+.topbar-title{font-weight:600;font-size:15px;}
+.topbar-sub{font-size:11.5px;color:var(--text-faint);}
+#search-wrap{flex:1;max-width:420px;position:relative;margin-left:8px;}
+#global-search{
+  width:100%;background:var(--panel);border:1px solid var(--border);
+  border-radius:var(--radius-sm);padding:7px 12px 7px 30px;font-size:12.5px;color:var(--text);
+  outline:none;
+}
+#global-search:focus{border-color:var(--teal);}
+#search-wrap::before{
+  content:'';position:absolute;left:11px;top:50%;transform:translateY(-50%);
+  width:11px;height:11px;border:1.5px solid var(--text-faint);border-radius:50%;
+}
+#search-wrap::after{
+  content:'';position:absolute;left:19px;top:63%;width:5px;height:1.5px;background:var(--text-faint);
+  transform:rotate(45deg);
+}
+#search-results{
+  position:absolute;top:36px;left:0;right:0;background:var(--panel);
+  border:1px solid var(--border);border-radius:var(--radius);
+  max-height:360px;overflow-y:auto;display:none;z-index:50;
+  box-shadow:0 12px 32px rgba(0,0,0,.45);
+}
+#search-results.show{display:block;}
+.sr-group{padding:6px 10px;}
+.sr-group-title{font-size:10px;color:var(--text-faint);padding:6px 4px 4px;}
+.sr-item{padding:7px 8px;border-radius:var(--radius-sm);cursor:pointer;font-size:12.5px;}
+.sr-item:hover{background:var(--panel-hover);}
+.sr-item .sr-meta{color:var(--text-faint);font-size:11px;}
+
+.topbar-actions{display:flex;align-items:center;gap:10px;margin-left:auto;}
+.icon-btn{
+  width:32px;height:32px;border-radius:var(--radius-sm);border:1px solid var(--border);
+  background:var(--panel);display:flex;align-items:center;justify-content:center;
+  color:var(--text-dim);position:relative;
+}
+.icon-btn:hover{background:var(--panel-hover);color:var(--text);}
+.icon-btn .dot{
+  position:absolute;top:5px;right:5px;width:7px;height:7px;border-radius:50%;
+  background:var(--red);border:1.5px solid var(--bg);
+}
+.avatar{
+  width:32px;height:32px;border-radius:50%;background:linear-gradient(160deg,#1E3350,#0E1826);
+  border:1px solid var(--border);display:flex;align-items:center;justify-content:center;
+  font-size:11.5px;font-weight:600;color:var(--gold);
+}
+#notif-panel{
+  position:absolute;top:52px;right:70px;width:340px;background:var(--panel);
+  border:1px solid var(--border);border-radius:var(--radius);z-index:60;display:none;
+  box-shadow:0 12px 32px rgba(0,0,0,.45);
+}
+#notif-panel.show{display:block;}
+.notif-head{padding:12px 14px;border-bottom:1px solid var(--border-soft);font-weight:600;font-size:13px;}
+.notif-item{padding:10px 14px;border-bottom:1px solid var(--border-soft);font-size:12px;display:flex;gap:8px;}
+.notif-item:last-child{border-bottom:none;}
+.notif-item .ndot{width:6px;height:6px;border-radius:50%;background:var(--teal);margin-top:5px;flex:none;}
+.notif-time{color:var(--text-faint);font-size:10.5px;margin-top:2px;}
+
+#content{flex:1;overflow-y:auto;padding:22px 26px 60px;}
+
+/* ---------- SHARED COMPONENTS ---------- */
+.page-head{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px;}
+.page-title{font-size:19px;font-weight:600;letter-spacing:-.01em;}
+.page-desc{color:var(--text-dim);font-size:12.5px;margin-top:3px;}
+.btn{
+  display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:var(--radius-sm);
+  border:1px solid var(--border);background:var(--panel);color:var(--text);font-size:12.5px;font-weight:500;
+}
+.btn:hover{background:var(--panel-hover);}
+.btn-primary{background:var(--teal);border-color:var(--teal);color:#06201A;font-weight:600;}
+.btn-primary:hover{background:#3DE0AF;}
+.btn-gold{background:var(--gold);border-color:var(--gold);color:#241A05;font-weight:600;}
+.btn-gold:hover{background:#DBB25E;}
+.btn-ghost{background:transparent;}
+.btn-sm{padding:5px 10px;font-size:11.5px;}
+.btn:disabled{opacity:.4;cursor:not-allowed;}
+
+.grid{display:grid;gap:14px;}
+.grid-4{grid-template-columns:repeat(4,1fr);}
+.grid-3{grid-template-columns:repeat(3,1fr);}
+.grid-2{grid-template-columns:repeat(2,1fr);}
+@media(max-width:1100px){.grid-4{grid-template-columns:repeat(2,1fr);}.grid-3{grid-template-columns:repeat(2,1fr);}}
+
+.card{background:var(--panel);border:1px solid var(--border-soft);border-radius:var(--radius);padding:16px;}
+.card-tight{padding:12px 14px;}
+.stat-card .stat-label{font-size:11px;color:var(--text-faint);margin-bottom:8px;}
+.stat-card .stat-value{font-family:var(--mono);font-size:26px;font-weight:600;}
+.stat-card .stat-foot{font-size:11px;color:var(--text-dim);margin-top:6px;}
+.stat-card .stat-foot.up{color:var(--teal);}
+.stat-card .stat-foot.warn{color:var(--gold);}
+
+.section-title{font-size:13.5px;font-weight:600;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;}
+.section-title .link{font-size:11.5px;font-weight:500;color:var(--teal);}
+
+.tag{
+  display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:10.5px;font-weight:500;
+  border:1px solid transparent;
+}
+.tag-teal{background:var(--teal-dim);color:var(--teal);border-color:rgba(51,206,159,.3);}
+.tag-gold{background:var(--gold-dim);color:var(--gold);border-color:rgba(203,162,78,.3);}
+.tag-red{background:var(--red-dim);color:var(--red);border-color:rgba(228,105,93,.3);}
+.tag-blue{background:var(--blue-dim);color:var(--blue);border-color:rgba(93,147,242,.3);}
+.tag-gray{background:var(--bg-elev);color:var(--text-dim);border-color:var(--border);}
+
+table{width:100%;border-collapse:collapse;}
+th{
+  text-align:left;font-size:10.5px;color:var(--text-faint);font-weight:500;
+  padding:0 10px 8px;border-bottom:1px solid var(--border-soft);
+}
+td{padding:10px 10px;border-bottom:1px solid var(--border-soft);font-size:12.5px;vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr.row-hover:hover{background:var(--panel-hover);cursor:pointer;}
+
+.list-row{display:flex;align-items:center;gap:10px;padding:9px 4px;border-bottom:1px solid var(--border-soft);}
+.list-row:last-child{border-bottom:none;}
+.row-time{font-family:var(--mono);font-size:11.5px;color:var(--text-dim);width:60px;flex:none;}
+.row-main{flex:1;min-width:0;}
+.row-title{font-size:12.5px;font-weight:500;}
+.row-sub{font-size:11px;color:var(--text-faint);margin-top:1px;}
+
+.empty{padding:32px 10px;text-align:center;color:var(--text-faint);font-size:12px;}
+.empty .empty-title{color:var(--text-dim);font-size:13px;margin-bottom:4px;font-weight:500;}
+
+.progress-track{height:5px;background:var(--bg-elev);border-radius:4px;overflow:hidden;margin-top:6px;}
+.progress-fill{height:100%;background:var(--teal);border-radius:4px;}
+.progress-fill.warn{background:var(--gold);}
+.progress-fill.full{background:var(--red);}
+
+.checklist-item{display:flex;align-items:center;gap:10px;padding:9px 4px;border-bottom:1px solid var(--border-soft);}
+.checklist-item:last-child{border-bottom:none;}
+.check-circle{
+  width:17px;height:17px;border-radius:50%;border:1.5px solid var(--border);flex:none;
+  display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--bg);
+}
+.check-circle.done{background:var(--teal);border-color:var(--teal);}
+.check-circle.current{border-color:var(--gold);}
+.check-label{font-size:12.5px;}
+.check-label.done{color:var(--text-dim);}
+.check-label.current{color:var(--text);font-weight:500;}
+
+/* HERO / BRIEFING */
+.hero-card{
+  background:linear-gradient(150deg,var(--panel) 0%,var(--bg-elev) 100%);
+  border:1px solid var(--border-soft);border-radius:10px;padding:22px 24px;margin-bottom:18px;
+  position:relative;overflow:hidden;
+}
+.hero-eyebrow{font-size:11px;color:var(--text-faint);margin-bottom:6px;}
+.hero-greeting{font-family:var(--serif);font-style:italic;font-size:23px;color:var(--text);margin-bottom:14px;}
+.hero-stats{display:flex;gap:28px;flex-wrap:wrap;margin-top:6px;}
+.hero-stat b{font-family:var(--mono);font-size:20px;display:block;color:var(--text);}
+.hero-stat span{font-size:11px;color:var(--text-faint);}
+.briefing-box{
+  margin-top:16px;background:var(--bg);border:1px solid var(--border-soft);border-radius:var(--radius);
+  padding:14px 16px;display:none;
+}
+.briefing-box.show{display:block;}
+.briefing-box ul{list-style:none;margin-top:8px;}
+.briefing-box li{padding:4px 0 4px 14px;position:relative;font-size:12.5px;color:var(--text-dim);}
+.briefing-box li::before{content:'—';position:absolute;left:0;color:var(--text-faint);}
+
+/* MODALS */
+.overlay{
+  position:fixed;inset:0;background:rgba(4,8,13,.65);backdrop-filter:blur(2px);
+  display:none;align-items:flex-start;justify-content:center;z-index:100;padding:40px 20px;overflow-y:auto;
+}
+.overlay.show{display:flex;}
+.modal{
+  background:var(--panel);border:1px solid var(--border);border-radius:10px;
+  width:100%;max-width:560px;box-shadow:0 24px 60px rgba(0,0,0,.5);
+}
+.modal-head{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border-soft);}
+.modal-head h3{font-size:14.5px;font-weight:600;}
+.modal-close{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--text-faint);border:1px solid var(--border);background:transparent;}
+.modal-close:hover{background:var(--panel-hover);color:var(--text);}
+.modal-body{padding:18px 20px;max-height:70vh;overflow-y:auto;}
+.modal-foot{display:flex;justify-content:flex-end;gap:8px;padding:14px 20px;border-top:1px solid var(--border-soft);}
+
+.field{margin-bottom:13px;}
+.field label{display:block;font-size:11.5px;color:var(--text-dim);margin-bottom:5px;font-weight:500;}
+.field input,.field select,.field textarea{
+  width:100%;background:var(--bg-elev);border:1px solid var(--border);border-radius:var(--radius-sm);
+  padding:8px 10px;outline:none;
+}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--teal);}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+
+/* TOAST */
+#toast-wrap{position:fixed;bottom:20px;right:20px;z-index:200;display:flex;flex-direction:column;gap:8px;}
+.toast{
+  background:var(--panel);border:1px solid var(--border);border-left:3px solid var(--teal);
+  border-radius:var(--radius-sm);padding:10px 14px;font-size:12.5px;box-shadow:0 8px 24px rgba(0,0,0,.4);
+  min-width:240px;animation:toastin .25s ease;
+}
+@keyframes toastin{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+
+/* TABS */
+.tabbar{display:flex;gap:4px;border-bottom:1px solid var(--border-soft);margin-bottom:16px;}
+.tab{padding:8px 12px;font-size:12.5px;color:var(--text-dim);border-bottom:2px solid transparent;cursor:pointer;}
+.tab:hover{color:var(--text);}
+.tab.active{color:var(--text);border-color:var(--teal);font-weight:500;}
+
+/* CHAT (AI Assistant) */
+.chat-wrap{display:flex;flex-direction:column;height:calc(100vh - 180px);border:1px solid var(--border-soft);border-radius:var(--radius);background:var(--panel);}
+.chat-log{flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:14px;}
+.chat-msg{max-width:78%;font-size:12.5px;line-height:1.55;}
+.chat-msg.user{align-self:flex-end;background:var(--teal-dim);color:var(--text);border:1px solid rgba(51,206,159,.25);border-radius:10px 10px 2px 10px;padding:9px 13px;}
+.chat-msg.ai{align-self:flex-start;background:var(--bg-elev);border:1px solid var(--border-soft);border-radius:10px 10px 10px 2px;padding:11px 14px;white-space:pre-line;}
+.chat-suggest{display:flex;flex-wrap:wrap;gap:6px;padding:0 18px 12px;}
+.chip-btn{border:1px solid var(--border);background:var(--bg-elev);color:var(--text-dim);padding:5px 10px;border-radius:20px;font-size:11px;}
+.chip-btn:hover{border-color:var(--teal);color:var(--teal);}
+.chat-input-row{display:flex;gap:8px;padding:12px;border-top:1px solid var(--border-soft);}
+.chat-input-row input{flex:1;background:var(--bg-elev);border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 12px;outline:none;}
+.chat-input-row input:focus{border-color:var(--teal);}
+
+/* CALENDAR */
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;}
+.cal-daylabel{font-size:10.5px;color:var(--text-faint);text-align:center;padding-bottom:4px;}
+.cal-cell{background:var(--bg-elev);border:1px solid var(--border-soft);border-radius:var(--radius-sm);min-height:88px;padding:6px;font-size:11px;}
+.cal-cell.today{border-color:var(--teal);}
+.cal-date{color:var(--text-faint);font-size:10.5px;margin-bottom:4px;}
+.cal-cell.today .cal-date{color:var(--teal);font-weight:600;}
+.cal-evt{background:var(--panel-hover);border-left:2px solid var(--blue);padding:2px 5px;border-radius:2px;margin-bottom:3px;font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.cal-evt.official{border-color:var(--gold);}
+.cal-evt.constituency{border-color:var(--teal);}
+.cal-evt.visit{border-color:var(--red);}
+
+/* MISC */
+.kv{display:flex;justify-content:space-between;font-size:12px;padding:6px 0;border-bottom:1px solid var(--border-soft);}
+.kv:last-child{border-bottom:none;}
+.kv .k{color:var(--text-faint);}
+.divider{height:1px;background:var(--border-soft);margin:16px 0;}
+.role-note{font-size:11px;color:var(--text-faint);margin-top:4px;}
+.avatar-sm{width:26px;height:26px;border-radius:50%;background:var(--bg-elev);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:var(--gold);flex:none;}
+</style>
+</head>
+<body>
+
+<div id="app">
+  <div id="sidebar">
+    <div class="brand">
+      <div class="brand-mark">
+        <div class="brand-glyph">IP</div>
+        <div>
+          <div class="brand-name">IndianPol</div>
+          <div class="brand-sub">MP Operating System</div>
+        </div>
+      </div>
+      <div class="demo-chip">Demonstration environment</div>
+    </div>
+    <div class="nav-scroll" id="nav-scroll"></div>
+    <div class="sidebar-footer">
+      <div class="role-box">
+        <label>Viewing as</label>
+        <select id="role-select"></select>
+      </div>
+    </div>
+  </div>
+
+  <div id="main-wrap">
+    <div id="topbar">
+      <div>
+        <div class="topbar-title" id="tb-title">Command Center</div>
+        <div class="topbar-sub" id="tb-sub">Arun Bharti Office · Jamui, Bihar</div>
+      </div>
+      <div id="search-wrap">
+        <input id="global-search" placeholder="Search people, cases, appointments, documents…" autocomplete="off">
+        <div id="search-results"></div>
+      </div>
+      <div class="topbar-actions">
+        <button class="icon-btn" id="notif-btn" title="Notifications">🔔<span class="dot" id="notif-dot"></span></button>
+        <div class="avatar" id="user-avatar">AB</div>
+      </div>
+      <div id="notif-panel"></div>
+    </div>
+    <div id="content"></div>
+  </div>
+</div>
+
+<div id="modal-overlay" class="overlay"><div class="modal" id="modal-box"></div></div>
+<div id="toast-wrap"></div>
+
+<script>
+/* =========================================================
+   DATA MODEL
+========================================================= */
+const OFFICE = { mp:"Hon. Arun Bharti", constituency:"Jamui", state:"Bihar", officeName:"Arun Bharti Office" };
+
+const ROLES = [
+  {id:"mp", label:"MP — Arun Bharti", approve:true},
+  {id:"pa", label:"PA / Personal Assistant", approve:false},
+  {id:"om", label:"Office Manager", approve:false},
+  {id:"cc", label:"Constituency Coordinator", approve:false},
+  {id:"pc", label:"Protocol Coordinator", approve:false},
+  {id:"cm", label:"Case / Grievance Manager", approve:false},
+  {id:"comm", label:"Communications Manager", approve:false},
+  {id:"admin", label:"Administrator", approve:true},
+];
+let currentRole = "pa";
+
+let DB = {
+  appointments:[
+    {id:"AP-101",name:"Ramesh Pandey",org:"District Administration",phone:"98xxxxxx21",type:"Official",time:"09:30 AM",status:"Confirmed",priority:"High",purpose:"PWD road funding discussion — Jhajha stretch"},
+    {id:"AP-102",name:"Sunita Devi",org:"Citizen — Barhat",phone:"91xxxxxx08",type:"Constituency",time:"10:15 AM",status:"Confirmed",priority:"Medium",purpose:"Pension grievance follow-up"},
+    {id:"AP-103",name:"Er. Vikram Singh",org:"PWD, Jamui Division",phone:"99xxxxxx44",type:"Official",time:"11:00 AM",status:"Pending",priority:"High",purpose:"Jhajha road inspection report review"},
+    {id:"AP-104",name:"Dr. Neha Ranjan",org:"NITI Aayog (video call)",phone:"—",type:"Online",time:"12:00 PM",status:"Confirmed",priority:"Medium",purpose:"Aspirational block progress review"},
+    {id:"AP-105",name:"Sono Traders Association",org:"Delegation, 6 members",phone:"97xxxxxx19",type:"Delegation",time:"04:00 PM",status:"Confirmed",priority:"Medium",purpose:"Market infrastructure request"},
+    {id:"AP-106",name:"Anita Kumari",org:"Citizen — Jamui Sadar",phone:"90xxxxxx77",type:"Direct",time:"05:00 PM",status:"Pending",priority:"Low",purpose:"Scholarship eligibility query"},
+  ],
+  capacity:{
+    Direct:{used:6,max:8}, Online:{used:2,max:4}, Official:{used:2,max:3}, Delegation:{used:1,max:2}
+  },
+  cases:[
+    {id:"CS-2201",citizen:"Manoj Yadav",location:"Jhajha",category:"Road",status:"In Progress",priority:"High",days:6,deadline:"30 Sep"},
+    {id:"CS-2198",citizen:"Kiran Devi",location:"Chakai",category:"Electricity",status:"Assigned",priority:"Medium",days:4,deadline:"02 Oct"},
+    {id:"CS-2179",citizen:"Bharat Mahto",location:"Sono",category:"Pension",status:"Follow-up",priority:"High",days:19,deadline:"27 Sep"},
+    {id:"CS-2166",citizen:"Rina Kumari",location:"Jamui Sadar",category:"Water",status:"New",priority:"Medium",days:1,deadline:"05 Oct"},
+    {id:"CS-2140",citizen:"Suresh Paswan",location:"Khaira",category:"Land",status:"Follow-up",priority:"High",days:23,deadline:"26 Sep"},
+    {id:"CS-2131",citizen:"Anjali Singh",location:"Jhajha",category:"Education",status:"In Progress",priority:"Low",days:9,deadline:"04 Oct"},
+    {id:"CS-2119",citizen:"Deepak Ram",location:"Barhat",category:"Health",status:"Resolved",priority:"Medium",days:31,deadline:"—"},
+    {id:"CS-2098",citizen:"Farhana Khatoon",location:"Chakai",category:"Police / Administration",status:"Follow-up",priority:"High",days:17,deadline:"28 Sep"},
+  ],
+  visits:[
+    {id:"VS-14",place:"Jhajha",date:"Today, 25 Sep",status:"Confirmed",
+      schedule:[["11:30","Arrival"],["12:00","Community Meeting"],["13:00","Infrastructure Review"],["14:00","Local Delegation"],["15:00","Departure"]]},
+    {id:"VS-15",place:"Chakai",date:"28 Sep",status:"Planning",
+      schedule:[["10:00","Arrival"],["10:30","School Inauguration"],["12:00","Community Interaction"]]},
+    {id:"VS-16",place:"Barhat",date:"03 Oct",status:"Requested",
+      schedule:[["09:00","Arrival"],["09:30","Farmers' Meeting"]]},
+  ],
+  protocol:{
+    "VS-14":["Visit created","Location confirmed","Local coordinator assigned","Draft communication","Staff review","MP / authorized approval","Dispatch"],
+  },
+  protocolProgress:{ "VS-14": 3 }, // steps completed
+  people:[
+    {name:"Dr. R.K. Sinha",role:"District Magistrate, Jamui",cat:"Official",area:"Jamui Sadar",phone:"94xxxxxx02"},
+    {name:"Ajay Kumar",role:"Superintendent of Police, Jamui",cat:"Official",area:"Jamui Sadar",phone:"94xxxxxx55"},
+    {name:"Manoj Yadav",role:"Citizen — road grievance",cat:"Citizen",area:"Jhajha",phone:"98xxxxxx31"},
+    {name:"Puja Bharti",role:"Constituency Coordinator, Chakai",cat:"Volunteer",area:"Chakai",phone:"90xxxxxx14"},
+    {name:"Sono Traders Association",role:"Local business body",cat:"Organization",area:"Sono",phone:"97xxxxxx19"},
+    {name:"Ravi Prakash",role:"Local journalist, Dainik Bhaskar",cat:"Media",area:"Jamui Sadar",phone:"93xxxxxx60"},
+    {name:"Er. Vikram Singh",role:"Executive Engineer, PWD",cat:"Official",area:"Jamui Sadar",phone:"99xxxxxx44"},
+  ],
+  volunteers:{total:1248,active:932,inactive:316,byArea:{Jhajha:312,"Jamui Sadar":410,Chakai:241,Other:285}},
+  documents:[
+    {id:"DC-901",name:"Jhajha_Event_Invitation.pdf",received:"Today, 08:12 AM",status:"Unread",
+      from:"Block Development Office, Jhajha",
+      extraction:{event:"Jhajha Constituency Visit",date:"28 September",time:"11:30 AM",location:"Jhajha",
+        purpose:"Community interaction",
+        actions:["Add calendar event","Create visit","Check protocol requirements","Notify constituency coordinator","Prepare official response"]}},
+  ],
+  importantDates:[
+    {name:"Dr. R.K. Sinha",occasion:"Birthday",cat:"Official"},
+    {name:"Kiran Devi",occasion:"Birthday",cat:"Citizen"},
+    {name:"Sono Traders Association",occasion:"Founding anniversary",cat:"Organization"},
+    {name:"Jhajha Annual Mela",occasion:"Community event",cat:"Event"},
+  ],
+  tasks:[
+    {id:"TK-501",title:"Send infrastructure document to PWD department",owner:"Office Coordinator",due:"Tomorrow",priority:"High",source:"District Administration Meeting",status:"open",bucket:"today"},
+    {id:"TK-498",title:"Confirm Jhajha visit route with local police",owner:"Protocol Coordinator",due:"Today",priority:"High",source:"Visit VS-14",status:"open",bucket:"today"},
+    {id:"TK-495",title:"Draft reply to scholarship query — Anita Kumari",owner:"PA",due:"Today",priority:"Medium",source:"Appointment AP-106",status:"open",bucket:"today"},
+    {id:"TK-480",title:"Follow up on pension case CS-2179",owner:"Case Manager",due:"22 Sep",priority:"High",source:"Case CS-2179",status:"open",bucket:"overdue"},
+    {id:"TK-477",title:"Verify land dispute documents — CS-2140",owner:"Case Manager",due:"20 Sep",priority:"High",source:"Case CS-2140",status:"open",bucket:"overdue"},
+    {id:"TK-470",title:"Prepare Chakai school inauguration briefing",owner:"PA",due:"27 Sep",priority:"Medium",source:"Visit VS-15",status:"open",bucket:"upcoming"},
+    {id:"TK-460",title:"Update volunteer list for Barhat block",owner:"Constituency Coordinator",due:"01 Oct",priority:"Low",source:"Volunteers",status:"open",bucket:"upcoming"},
+  ],
+  notifications:[
+    {text:"New appointment request from Sono Traders Association",time:"9 min ago"},
+    {text:"Document received — Jhajha_Event_Invitation.pdf",time:"41 min ago"},
+    {text:"Protocol pending approval — Jhajha visit draft",time:"1 hr ago"},
+    {text:"Case CS-2140 has crossed 20 days without resolution",time:"2 hr ago"},
+    {text:"2 important dates today",time:"6 hr ago"},
+  ],
+  auditLog:[
+    {time:"08:12",text:"System received document — Jhajha_Event_Invitation.pdf"},
+    {time:"09:02",text:"PA created appointment AP-104 (Online — NITI Aayog)"},
+    {time:"09:15",text:"Protocol Coordinator advanced Jhajha visit to 'Local coordinator assigned'"},
+  ],
+  communications:[
+    {name:"Appointment confirmation",body:"Your meeting request with the MP's office has been confirmed for {date} at {time}.",approval:false},
+    {name:"Appointment reminder",body:"Reminder: your scheduled meeting is tomorrow at {time}.",approval:false},
+    {name:"Staff notification",body:"New appointment assigned to you: {name}, {time}.",approval:false},
+    {name:"Volunteer notification",body:"Your assigned constituency activity for {area} has been updated.",approval:false},
+    {name:"Important date greeting",body:"Best wishes on your {occasion} from the MP's office.",approval:true},
+    {name:"Visit coordination",body:"Hon. MP is scheduled to visit {place} on {date}. Please coordinate accordingly.",approval:true},
+  ],
+};
+
+/* =========================================================
+   NAV CONFIG
+========================================================= */
+const NAV = [
+  {id:"command", label:"Command Center"},
+  {id:"appointments", label:"Appointments", badge:()=>DB.appointments.length},
+  {id:"calendar", label:"Calendar"},
+  {id:"constituency", label:"Constituency"},
+  {id:"cases", label:"Cases", badge:()=>DB.cases.filter(c=>c.status!=="Resolved").length},
+  {id:"visits", label:"Visits"},
+  {id:"protocol", label:"Protocol"},
+  {id:"people", label:"People"},
+  {id:"volunteers", label:"Volunteers"},
+  {id:"documents", label:"Documents", badge:()=>DB.documents.filter(d=>d.status==="Unread").length||null},
+  {id:"communications", label:"Communications"},
+  {id:"dates", label:"Important Dates", badge:()=>DB.importantDates.length},
+  {id:"tasks", label:"Tasks", badge:()=>DB.tasks.filter(t=>t.status==="open").length},
+  {id:"reports", label:"Reports"},
+  {id:"assistant", label:"AI Assistant"},
+  {id:"settings", label:"Settings"},
+];
+let route = "command";
+
+/* =========================================================
+   HELPERS
+========================================================= */
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function toast(msg){
+  const w=document.getElementById('toast-wrap');
+  const t=document.createElement('div');
+  t.className='toast'; t.textContent=msg;
+  w.appendChild(t);
+  setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity .3s';setTimeout(()=>t.remove(),300);},3200);
+}
+function log(text){
+  const t=new Date(); const hh=String(t.getHours()).padStart(2,'0'), mm=String(t.getMinutes()).padStart(2,'0');
+  DB.auditLog.unshift({time:`${hh}:${mm}`,text});
+}
+function priorityTag(p){
+  const map={High:'tag-red',Medium:'tag-gold',Low:'tag-gray'};
+  return `<span class="tag ${map[p]||'tag-gray'}">${p}</span>`;
+}
+function statusTag(s){
+  const map={
+    Confirmed:'tag-teal',Pending:'tag-gold',New:'tag-blue',Assigned:'tag-gold',
+    "In Progress":'tag-blue',"Follow-up":'tag-red',Resolved:'tag-teal',Closed:'tag-gray',
+    Planning:'tag-gold',Requested:'tag-blue',Unread:'tag-gold',Read:'tag-gray'
+  };
+  return `<span class="tag ${map[s]||'tag-gray'}">${s}</span>`;
+}
+function canApprove(){ return ROLES.find(r=>r.id===currentRole).approve; }
+
+/* =========================================================
+   RENDER: SIDEBAR / TOPBAR
+========================================================= */
+function renderSidebar(){
+  const nav=document.getElementById('nav-scroll');
+  nav.innerHTML = NAV.map(n=>{
+    const badge = n.badge ? n.badge() : null;
+    return `<div class="nav-item ${route===n.id?'active':''}" data-nav="${n.id}">
+      <span class="nav-dot"></span><span>${n.label}</span>
+      ${badge?`<span class="nav-badge">${badge}</span>`:''}
+    </div>`;
+  }).join('');
+  nav.querySelectorAll('[data-nav]').forEach(el=>{
+    el.addEventListener('click',()=>{ route=el.dataset.nav; renderAll(); });
+  });
+
+  const sel=document.getElementById('role-select');
+  if(!sel.dataset.init){
+    sel.innerHTML = ROLES.map(r=>`<option value="${r.id}">${r.label}</option>`).join('');
+    sel.value = currentRole;
+    sel.dataset.init="1";
+    sel.addEventListener('change',()=>{ currentRole=sel.value; renderAll(); toast(`Now viewing as ${ROLES.find(r=>r.id===currentRole).label}`); });
+  }
+}
+function renderTopbar(){
+  const n = NAV.find(x=>x.id===route);
+  document.getElementById('tb-title').textContent = n.label;
+  document.getElementById('tb-sub').textContent = `${OFFICE.officeName} · ${OFFICE.constituency}, ${OFFICE.state}`;
+  document.getElementById('notif-dot').style.display = DB.notifications.length? 'block':'none';
+}
+
+/* =========================================================
+   PAGE: COMMAND CENTER
+========================================================= */
+function pageCommand(){
+  const conf = DB.appointments.filter(a=>a.status==="Confirmed").length;
+  const pend = DB.appointments.filter(a=>a.status==="Pending").length;
+  const byType = t => DB.appointments.filter(a=>a.type===t).length;
+  const overdueTasks = DB.tasks.filter(t=>t.bucket==="overdue"&&t.status==="open").length;
+  const pendingProtocol = DB.protocol["VS-14"] ? DB.protocol["VS-14"].length - DB.protocolProgress["VS-14"] : 0;
+
+  return `
+  <div class="hero-card">
+    <div class="hero-eyebrow">${new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long'})}</div>
+    <div class="hero-greeting">Good morning, ${OFFICE.officeName}</div>
+    <div class="hero-stats">
+      <div class="hero-stat"><b>${DB.appointments.length}</b><span>Meetings today</span></div>
+      <div class="hero-stat"><b>${byType('Official')}</b><span>Official</span></div>
+      <div class="hero-stat"><b>${byType('Direct')}</b><span>Direct</span></div>
+      <div class="hero-stat"><b>${byType('Online')}</b><span>Online</span></div>
+      <div class="hero-stat"><b>1</b><span>Constituency visit</span></div>
+      <div class="hero-stat"><b>${pend}</b><span>Pending approvals</span></div>
+    </div>
+    <div style="margin-top:16px;display:flex;gap:8px;">
+      <button class="btn btn-primary" data-action="prepare-day">Prepare my day</button>
+      <button class="btn" data-nav="appointments">New appointment</button>
+      <button class="btn" data-nav="documents">Read document</button>
+      <button class="btn" data-nav="protocol">Create protocol</button>
+    </div>
+    <div class="briefing-box" id="briefing-box">
+      <div style="font-weight:600;font-size:13px;">Today's briefing</div>
+      <ul>
+        <li>${DB.appointments.length} meetings, first at ${DB.appointments[0].time}</li>
+        <li>Constituency visit to Jhajha at 1:00 PM</li>
+        <li>${pendingProtocol} protocol action${pendingProtocol===1?'':'s'} pending for the Jhajha visit</li>
+        <li>${DB.tasks.filter(t=>t.status==='open').length} follow-ups pending across the office</li>
+        <li>${DB.importantDates.filter(d=>d.occasion==='Birthday').length} important birthdays today</li>
+        <li>${DB.cases.filter(c=>c.priority==='High'&&c.status!=='Resolved').length} high-priority constituency cases open</li>
+        <li>${DB.documents.filter(d=>d.status==='Unread').length} document requiring approval / review</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="grid grid-4" style="margin-bottom:16px;">
+    <div class="card stat-card">
+      <div class="stat-label">Today's meetings</div>
+      <div class="stat-value">${DB.appointments.length}</div>
+      <div class="stat-foot">${conf} confirmed · ${pend} pending</div>
+    </div>
+    <div class="card stat-card">
+      <div class="stat-label">Pending follow-ups</div>
+      <div class="stat-value">${DB.tasks.filter(t=>t.status==='open').length}</div>
+      <div class="stat-foot ${overdueTasks?'warn':''}">${overdueTasks} overdue</div>
+    </div>
+    <div class="card stat-card">
+      <div class="stat-label">High-priority cases</div>
+      <div class="stat-value">${DB.cases.filter(c=>c.priority==='High'&&c.status!=='Resolved').length}</div>
+      <div class="stat-foot">of ${DB.cases.length} total open</div>
+    </div>
+    <div class="card stat-card">
+      <div class="stat-label">Protocol pending</div>
+      <div class="stat-value">${pendingProtocol}</div>
+      <div class="stat-foot warn">Jhajha visit, today</div>
+    </div>
+  </div>
+
+  <div class="grid grid-3">
+    <div class="card">
+      <div class="section-title">Appointment capacity<span class="link" data-nav="appointments">View all</span></div>
+      ${Object.entries(DB.capacity).map(([k,v])=>{
+        const pct=Math.round(v.used/v.max*100);
+        const cls = pct>=100?'full':pct>=75?'warn':'';
+        return `<div style="margin-bottom:10px;">
+          <div style="display:flex;justify-content:space-between;font-size:11.5px;"><span>${k}</span><span class="mono" style="font-family:var(--mono);color:var(--text-dim);">${v.used} / ${v.max}</span></div>
+          <div class="progress-track"><div class="progress-fill ${cls}" style="width:${pct}%;"></div></div>
+        </div>`;
+      }).join('')}
+    </div>
+
+    <div class="card">
+      <div class="section-title">Today's schedule<span class="link" data-nav="calendar">Calendar</span></div>
+      ${DB.appointments.map(a=>`
+        <div class="list-row">
+          <div class="row-time">${a.time}</div>
+          <div class="row-main"><div class="row-title">${esc(a.name)}</div><div class="row-sub">${a.type}</div></div>
+          ${statusTag(a.status)}
+        </div>`).join('')}
+    </div>
+
+    <div class="card">
+      <div class="section-title">What needs attention</div>
+      <div class="list-row"><div class="row-main"><div class="row-title">Protocol draft — Jhajha visit</div><div class="row-sub">Staff review required</div></div><span class="tag tag-gold">Pending</span></div>
+      <div class="list-row"><div class="row-main"><div class="row-title">Document review</div><div class="row-sub">Jhajha_Event_Invitation.pdf</div></div><span class="tag tag-gold">Unread</span></div>
+      <div class="list-row"><div class="row-main"><div class="row-title">CS-2140 land dispute</div><div class="row-sub">23 days, no update</div></div><span class="tag tag-red">Overdue</span></div>
+      <div class="list-row"><div class="row-main"><div class="row-title">2 birthdays today</div><div class="row-sub">Greeting not yet sent</div></div><span class="tag tag-blue">Draft</span></div>
+    </div>
+  </div>
+  `;
+}
+
+/* =========================================================
+   PAGE: APPOINTMENTS
+========================================================= */
+function pageAppointments(){
+  return `
+  <div class="page-head">
+    <div><div class="page-title">Appointments</div><div class="page-desc">Structured requests replacing phone bookings — ${DB.appointments.length} today</div></div>
+    <button class="btn btn-primary" data-action="open-new-appt">New appointment</button>
+  </div>
+  <div class="grid grid-4" style="margin-bottom:16px;">
+    ${Object.entries(DB.capacity).map(([k,v])=>{
+      const pct=Math.round(v.used/v.max*100); const cls = pct>=100?'full':pct>=75?'warn':'';
+      return `<div class="card stat-card"><div class="stat-label">${k} meetings</div><div class="stat-value">${v.used} <span style="font-size:14px;color:var(--text-faint);">/ ${v.max}</span></div>
+      <div class="progress-track"><div class="progress-fill ${cls}" style="width:${pct}%;"></div></div></div>`;
+    }).join('')}
+  </div>
+  <div class="card">
+    <table>
+      <thead><tr><th>Time</th><th>Name</th><th>Type</th><th>Purpose</th><th>Priority</th><th>Status</th></tr></thead>
+      <tbody>
+      ${DB.appointments.map(a=>`
+        <tr class="row-hover" data-action="view-appt" data-id="${a.id}">
+          <td style="font-family:var(--mono);">${a.time}</td>
+          <td><div style="font-weight:500;">${esc(a.name)}</div><div style="color:var(--text-faint);font-size:11px;">${esc(a.org)}</div></td>
+          <td><span class="tag tag-gray">${a.type}</span></td>
+          <td style="color:var(--text-dim);max-width:260px;">${esc(a.purpose)}</td>
+          <td>${priorityTag(a.priority)}</td>
+          <td>${statusTag(a.status)}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>
+  </div>
+  `;
+}
+
+function modalNewAppointment(){
+  return `
+  <div class="modal-head"><h3>New appointment</h3><button class="modal-close" data-action="close-modal">✕</button></div>
+  <div class="modal-body">
+    <div class="field-row">
+      <div class="field"><label>Name</label><input id="f-name" placeholder="Visitor name"></div>
+      <div class="field"><label>Phone</label><input id="f-phone" placeholder="10-digit mobile"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Organization</label><input id="f-org" placeholder="Organization / village"></div>
+      <div class="field"><label>Meeting type</label>
+        <select id="f-type"><option>Direct</option><option>Online</option><option>Official</option><option>Constituency</option><option>Delegation</option></select>
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Requested time</label><input id="f-time" placeholder="e.g. 03:30 PM"></div>
+      <div class="field"><label>Priority</label><select id="f-priority"><option>Medium</option><option>High</option><option>Low</option></select></div>
+    </div>
+    <div class="field"><label>Purpose</label><textarea id="f-purpose" rows="2" placeholder="Reason for the meeting"></textarea></div>
+  </div>
+  <div class="modal-foot">
+    <button class="btn" data-action="close-modal">Cancel</button>
+    <button class="btn btn-primary" data-action="submit-appt">Create appointment</button>
+  </div>
+  `;
+}
+
+function modalViewAppointment(id){
+  const a = DB.appointments.find(x=>x.id===id);
+  return `
+  <div class="modal-head"><h3>${esc(a.name)}</h3><button class="modal-close" data-action="close-modal">✕</button></div>
+  <div class="modal-body">
+    <div class="kv"><span class="k">Organization</span><span>${esc(a.org)}</span></div>
+    <div class="kv"><span class="k">Phone</span><span>${esc(a.phone)}</span></div>
+    <div class="kv"><span class="k">Type</span><span>${a.type}</span></div>
+    <div class="kv"><span class="k">Time</span><span>${a.time}</span></div>
+    <div class="kv"><span class="k">Priority</span><span>${priorityTag(a.priority)}</span></div>
+    <div class="kv"><span class="k">Status</span><span>${statusTag(a.status)}</span></div>
+    <div class="divider"></div>
+    <div style="font-size:11.5px;color:var(--text-faint);margin-bottom:5px;">Purpose</div>
+    <div style="font-size:12.5px;">${esc(a.purpose)}</div>
+  </div>
+  <div class="modal-foot">
+    ${a.status==='Pending' ? `<button class="btn" data-action="reject-appt" data-id="${a.id}">Decline</button><button class="btn btn-primary" data-action="confirm-appt" data-id="${a.id}">Confirm</button>` : `<button class="btn" data-action="close-modal">Close</button>`}
+  </div>
+  `;
+}
+
+/* =========================================================
+   PAGE: CALENDAR
+========================================================= */
+function pageCalendar(){
+  const days=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  const today = new Date();
+  const startOfWeek = new Date(today); startOfWeek.setDate(today.getDate()-today.getDay());
+  const evts = {
+    [today.getDate()]: [["09:30 Ramesh Pandey","official"],["10:15 Sunita Devi","constituency"],["13:00 Jhajha Visit","visit"],["16:00 Delegation","official"]]
+  };
+  let cells='';
+  for(let i=0;i<7;i++){
+    const d=new Date(startOfWeek); d.setDate(startOfWeek.getDate()+i);
+    const isToday = d.toDateString()===today.toDateString();
+    const dayEvts = isToday ? evts[today.getDate()]||[] : [];
+    cells += `<div class="cal-cell ${isToday?'today':''}">
+      <div class="cal-date">${d.getDate()}</div>
+      ${dayEvts.map(([t,c])=>`<div class="cal-evt ${c}">${t}</div>`).join('')}
+      ${!isToday && i===2 ? `<div class="cal-evt">10:00 Chakai prep call</div>`:''}
+    </div>`;
+  }
+  return `
+  <div class="page-head">
+    <div><div class="page-title">Calendar</div><div class="page-desc">Week of ${startOfWeek.toLocaleDateString('en-IN',{day:'numeric',month:'short'})}</div></div>
+    <div style="display:flex;gap:6px;"><span class="tag tag-gold">Official</span><span class="tag tag-teal">Constituency</span><span class="tag tag-red">Visit</span></div>
+  </div>
+  <div class="card">
+    <div class="cal-grid">${days.map(d=>`<div class="cal-daylabel">${d}</div>`).join('')}</div>
+    <div class="cal-grid" style="margin-top:4px;">${cells}</div>
+  </div>
+  <div class="card" style="margin-top:16px;">
+    <div class="section-title">Today, in order</div>
+    ${DB.appointments.map(a=>`<div class="list-row"><div class="row-time">${a.time}</div><div class="row-main"><div class="row-title">${esc(a.name)}</div><div class="row-sub">${a.type} · ${esc(a.purpose)}</div></div>${statusTag(a.status)}</div>`).join('')}
+    <div class="list-row"><div class="row-time">01:00 PM</div><div class="row-main"><div class="row-title">Jhajha constituency visit</div><div class="row-sub">Arrival, community meeting, infrastructure review</div></div><span class="tag tag-red">Visit</span></div>
+  </div>
+  `;
+}
+
+/* =========================================================
+   PAGE: CONSTITUENCY
+========================================================= */
+function pageConstituency(){
+  const areas = ["Jhajha","Jamui Sadar","Chakai","Sono","Khaira","Barhat"];
+  return `
+  <div class="page-head"><div><div class="page-title">Constituency — Jamui</div><div class="page-desc">Blocks, volunteer coverage and case load by area</div></div></div>
+  <div class="grid grid-3" style="grid-template-columns:repeat(3,1fr);">
+    ${areas.map(a=>{
+      const vol = DB.volunteers.byArea[a] || Math.round(DB.volunteers.byArea.Other/4);
+      const cases = DB.cases.filter(c=>c.location===a);
+      const open = cases.filter(c=>c.status!=='Resolved').length;
+      return `<div class="card">
+        <div style="font-weight:600;font-size:13.5px;margin-bottom:8px;">${a}</div>
+        <div class="kv"><span class="k">Volunteers</span><span>${vol}</span></div>
+        <div class="kv"><span class="k">Open cases</span><span>${open}</span></div>
+        <div class="kv"><span class="k">Resolved cases</span><span>${cases.length-open}</span></div>
+      </div>`;
+    }).join('')}
+  </div>
+  `;
+}
+
+/* =========================================================
+   PAGE: CASES
+========================================================= */
+let caseFilter = "all";
+function pageCases(){
+  const cats = [...new Set(DB.cases.map(c=>c.category))];
+  const filtered = caseFilter==="all" ? DB.cases : DB.cases.filter(c=>c.status===caseFilter);
+  return `
+  <div class="page-head">
+    <div><div class="page-title">Constituency cases</div><div class="page-desc">Grievance pipeline — New → Assigned → In Progress → Follow-up → Resolved → Closed</div></div>
+    <button class="btn btn-primary" data-action="open-new-case">New case</button>
+  </div>
+  <div class="tabbar">
+    ${["all","New","Assigned","In Progress","Follow-up","Resolved"].map(s=>`<div class="tab ${caseFilter===s?'active':''}" data-action="case-filter" data-val="${s}">${s==="all"?"All":s}</div>`).join('')}
+  </div>
+  <div class="card">
+    <table>
+      <thead><tr><th>Case</th><th>Citizen</th><th>Location</th><th>Category</th><th>Age</th><th>Priority</th><th>Status</th></tr></thead>
+      <tbody>
+      ${filtered.map(c=>`
+        <tr class="row-hover">
+          <td style="font-family:var(--mono);color:var(--text-dim);">${c.id}</td>
+          <td>${esc(c.citizen)}</td>
+          <td>${c.location}</td>
+          <td>${c.category}</td>
+          <td style="color:${c.days>15&&c.status!=='Resolved'?'var(--red)':'var(--text-dim)'};">${c.days}d</td>
+          <td>${priorityTag(c.priority)}</td>
+          <td>${statusTag(c.status)}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>
+    ${filtered.length===0?'<div class="empty"><div class="empty-title">No cases here</div>Nothing matches this filter.</div>':''}
+  </div>
+  `;
+}
+
+/* =========================================================
+   PAGE: VISITS
+========================================================= */
+function pageVisits(){
+  return `
+  <div class="page-head"><div><div class="page-title">Visit planning</div><div class="page-desc">Constituency visits, schedules and coordination</div></div>
+  <button class="btn btn-primary" data-action="open-new-case" disabled>Plan visit</button></div>
+  <div class="grid grid-3" style="grid-template-columns:1fr 1fr 1fr;">
+  ${DB.visits.map(v=>`
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;">
+        <div style="font-weight:600;font-size:14px;">${v.place}</div>${statusTag(v.status)}
+      </div>
+      <div style="color:var(--text-faint);font-size:11.5px;margin-bottom:10px;">${v.date}</div>
+      ${v.schedule.map(([t,e])=>`<div class="list-row"><div class="row-time">${t}</div><div class="row-main row-title">${e}</div></div>`).join('')}
+      ${v.id==='VS-14' ? `<button class="btn btn-sm" style="margin-top:10px;width:100%;" data-nav="protocol">View protocol status</button>`:''}
+    </div>
+  `).join('')}
+  </div>
+  `;
+}
+
+/* =========================================================
+   PAGE: PROTOCOL
+========================================================= */
+function pageProtocol(){
+  const steps = DB.protocol["VS-14"];
+  const done = DB.protocolProgress["VS-14"];
+  return `
+  <div class="page-head"><div><div class="page-title">Protocol coordination</div><div class="page-desc">Jhajha visit · District administration, police and local coordination</div></div></div>
+  <div class="grid grid-2" style="grid-template-columns:1.3fr 1fr;">
+    <div class="card">
+      <div class="section-title">Jhajha visit — protocol status</div>
+      ${steps.map((s,i)=>`
+        <div class="checklist-item">
+          <div class="check-circle ${i<done?'done':i===done?'current':''}">${i<done?'✓':''}</div>
+          <div class="check-label ${i<done?'done':i===done?'current':''}">${s}</div>
+        </div>
+      `).join('')}
+      <div style="margin-top:14px;display:flex;gap:8px;">
+        ${done<steps.length-2 ? `<button class="btn btn-primary" data-action="advance-protocol">Advance to next step</button>`:''}
+        ${done===steps.length-2 ? `<button class="btn btn-primary" data-action="advance-protocol">Generate AI draft</button>`:''}
+        ${done===steps.length-1 ? (canApprove() ? `<button class="btn btn-gold" data-action="advance-protocol">Approve & dispatch</button>` : `<button class="btn" disabled title="Requires MP or Administrator role">Awaiting authorized approval</button>`) : ''}
+        ${done>=steps.length ? `<span class="tag tag-teal">Dispatched</span>` : ''}
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-title">Coordination recipients</div>
+      <div class="list-row"><div class="row-main row-title">District administration</div><span class="tag tag-teal">Notified</span></div>
+      <div class="list-row"><div class="row-main row-title">Jhajha police station</div><span class="tag tag-teal">Notified</span></div>
+      <div class="list-row"><div class="row-main row-title">Local administrative authority</div><span class="tag tag-gold">Pending</span></div>
+      <div class="list-row"><div class="row-main row-title">Security / protocol team</div><span class="tag tag-gold">Pending</span></div>
+      <div class="divider"></div>
+      <div class="section-title" style="margin-bottom:6px;">Rule</div>
+      <div style="font-size:11.5px;color:var(--text-dim);">AI can draft and prepare protocol communication. Only an authorized user can approve and dispatch official correspondence.</div>
+    </div>
+  </div>
+  `;
+}
+
+/* =========================================================
+   PAGE: PEOPLE
+========================================================= */
+let peopleFilter="all";
+function pagePeople(){
+  const cats=[...new Set(DB.people.map(p=>p.cat))];
+  const filtered = peopleFilter==="all" ? DB.people : DB.people.filter(p=>p.cat===peopleFilter);
+  return `
+  <div class="page-head"><div><div class="page-title">People</div><div class="page-desc">Citizens, officials, volunteers, organizations and media contacts</div></div></div>
+  <div class="tabbar">${["all",...cats].map(c=>`<div class="tab ${peopleFilter===c?'active':''}" data-action="people-filter" data-val="${c}">${c==="all"?"All":c}</div>`).join('')}</div>
+  <div class="grid grid-3">
+  ${filtered.map(p=>`
+    <div class="card" style="display:flex;gap:10px;align-items:flex-start;">
+      <div class="avatar-sm">${p.name.split(' ').map(w=>w[0]).slice(0,2).join('')}</div>
+      <div style="min-width:0;">
+        <div style="font-weight:500;font-size:12.5px;">${esc(p.name)}</div>
+        <div style="color:var(--text-faint);font-size:11px;margin-top:1px;">${esc(p.role)}</div>
+        <div style="margin-top:6px;display:flex;gap:6px;"><span class="tag tag-gray">${p.area}</span></div>
+      </div>
+    </div>
+  `).join('')}
+  </div>
+  `;
+}
+
+/* =========================================================
+   PAGE: VOLUNTEERS
+========================================================= */
+function pageVolunteers(){
+  const v=DB.volunteers;
+  return `
+  <div class="page-head"><div><div class="page-title">Volunteers</div><div class="page-desc">Constituency-wide volunteer network</div></div></div>
+  <div class="grid grid-4" style="margin-bottom:16px;">
+    <div class="card stat-card"><div class="stat-label">Registered</div><div class="stat-value">${v.total.toLocaleString()}</div></div>
+    <div class="card stat-card"><div class="stat-label">Active</div><div class="stat-value">${v.active.toLocaleString()}</div><div class="stat-foot up">${Math.round(v.active/v.total*100)}% of total</div></div>
+    <div class="card stat-card"><div class="stat-label">Inactive</div><div class="stat-value">${v.inactive.toLocaleString()}</div></div>
+    <div class="card stat-card"><div class="stat-label">Areas covered</div><div class="stat-value">${Object.keys(v.byArea).length}</div></div>
+  </div>
+  <div class="card">
+    <div class="section-title">By area</div>
+    ${Object.entries(v.byArea).map(([a,n])=>{
+      const pct=Math.round(n/v.total*100);
+      return `<div style="margin-bottom:10px;"><div style="display:flex;justify-content:space-between;font-size:12px;"><span>${a}</span><span style="font-family:var(--mono);color:var(--text-dim);">${n}</span></div><div class="progress-track"><div class="progress-fill" style="width:${pct*2.2}%;"></div></div></div>`;
+    }).join('')}
+  </div>
+  `;
+}
+
+/* =========================================================
+   PAGE: DOCUMENTS
+========================================================= */
+let docExtracted = {};
+function pageDocuments(){
+  return `
+  <div class="page-head"><div><div class="page-title">Documents</div><div class="page-desc">AI-assisted reading of incoming letters and requests</div></div>
+  <button class="btn btn-primary" data-action="simulate-upload">Upload document</button></div>
+  <div class="grid grid-2" style="grid-template-columns:1fr 1.2fr;">
+    <div class="card">
+      <div class="section-title">Inbox</div>
+      ${DB.documents.map(d=>`
+        <div class="list-row row-hover" data-action="open-document" data-id="${d.id}">
+          <div class="row-main"><div class="row-title">${esc(d.name)}</div><div class="row-sub">${esc(d.from)} · ${d.received}</div></div>
+          ${statusTag(d.status)}
+        </div>`).join('')}
+    </div>
+    <div class="card" id="doc-detail">
+      <div class="empty"><div class="empty-title">Select a document</div>Choose a document from the inbox to read the AI extraction.</div>
+    </div>
+  </div>
+  `;
+}
+function docDetailHTML(d){
+  const ex = d.extraction;
+  return `
+    <div class="section-title">${esc(d.name)}</div>
+    <div style="font-size:11.5px;color:var(--text-faint);margin-bottom:12px;">From ${esc(d.from)} · Received ${d.received}</div>
+    <div style="background:var(--bg-elev);border:1px solid var(--border-soft);border-radius:var(--radius-sm);padding:12px;font-size:12px;color:var(--text-dim);margin-bottom:14px;">
+      "Letter requesting the Hon. MP's presence at a community event in Jhajha on 28 September."
+    </div>
+    ${docExtracted[d.id] ? `
+    <div style="font-weight:600;font-size:12.5px;margin-bottom:8px;">Document understood</div>
+    <div class="kv"><span class="k">Event</span><span>${ex.event}</span></div>
+    <div class="kv"><span class="k">Date</span><span>${ex.date}</span></div>
+    <div class="kv"><span class="k">Time</span><span>${ex.time}</span></div>
+    <div class="kv"><span class="k">Location</span><span>${ex.location}</span></div>
+    <div class="kv"><span class="k">Purpose</span><span>${ex.purpose}</span></div>
+    <div class="divider"></div>
+    <div style="font-weight:600;font-size:12.5px;margin-bottom:8px;">Suggested actions</div>
+    ${ex.actions.map((a,i)=>`<div class="list-row"><div class="row-main row-title">${a}</div><button class="btn btn-sm" data-action="doc-action" data-id="${d.id}" data-idx="${i}">Do it</button></div>`).join('')}
+    ` : `<button class="btn btn-primary" data-action="analyze-doc" data-id="${d.id}">Analyze with AI</button>`}
+  `;
+}
+
+/* =========================================================
+   PAGE: COMMUNICATIONS
+========================================================= */
+function pageCommunications(){
+  return `
+  <div class="page-head"><div><div class="page-title">Communications</div><div class="page-desc">Template-based messaging — sensitive templates require approval</div></div></div>
+  <div class="card">
+    <table>
+      <thead><tr><th>Template</th><th>Preview</th><th>Approval</th><th></th></tr></thead>
+      <tbody>
+      ${DB.communications.map((c,i)=>`
+        <tr>
+          <td style="font-weight:500;">${c.name}</td>
+          <td style="color:var(--text-dim);max-width:320px;">${esc(c.body)}</td>
+          <td>${c.approval?'<span class="tag tag-gold">Required</span>':'<span class="tag tag-gray">Auto-send</span>'}</td>
+          <td><button class="btn btn-sm" data-action="send-template" data-idx="${i}">${c.approval?'Send for approval':'Send'}</button></td>
+        </tr>`).join('')}
+      </tbody>
+    </table>
+  </div>
+  `;
+}
+
+/* =========================================================
+   PAGE: IMPORTANT DATES
+========================================================= */
+function pageDates(){
+  return `
+  <div class="page-head"><div><div class="page-title">Important dates</div><div class="page-desc">Today's birthdays, anniversaries and community events</div></div></div>
+  <div class="grid grid-2" style="grid-template-columns:1fr 1fr;">
+  ${DB.importantDates.map(d=>`
+    <div class="card" style="display:flex;justify-content:space-between;align-items:center;">
+      <div><div style="font-weight:500;font-size:12.5px;">${esc(d.name)}</div><div style="font-size:11px;color:var(--text-faint);">${d.occasion} · ${d.cat}</div></div>
+      <button class="btn btn-sm" data-action="prepare-greeting" data-name="${esc(d.name)}">Prepare message</button>
+    </div>
+  `).join('')}
+  </div>
+  `;
+}
+
+/* =========================================================
+   PAGE: TASKS
+========================================================= */
+function pageTasks(){
+  const buckets = [["overdue","Overdue"],["today","Due today"],["upcoming","Upcoming"]];
+  return `
+  <div class="page-head"><div><div class="page-title">Tasks</div><div class="page-desc">Every activity becomes a trackable task</div></div></div>
+  ${buckets.map(([key,label])=>{
+    const items = DB.tasks.filter(t=>t.bucket===key && t.status==="open");
+    if(!items.length) return '';
+    return `<div class="card" style="margin-bottom:14px;">
+      <div class="section-title">${label}<span class="link">${items.length}</span></div>
+      ${items.map(t=>`
+        <div class="list-row">
+          <div class="check-circle" data-action="complete-task" data-id="${t.id}" style="cursor:pointer;"></div>
+          <div class="row-main"><div class="row-title">${esc(t.title)}</div><div class="row-sub">${t.owner} · from ${t.source}</div></div>
+          ${priorityTag(t.priority)}
+        </div>`).join('')}
+    </div>`;
+  }).join('')}
+  `;
+}
+
+/* =========================================================
+   PAGE: REPORTS
+========================================================= */
+function pageReports(){
+  const bar = (label,val,max,color)=>`
+    <div style="margin-bottom:11px;">
+      <div style="display:flex;justify-content:space-between;font-size:12px;"><span>${label}</span><span style="font-family:var(--mono);color:var(--text-dim);">${val}</span></div>
+      <div class="progress-track"><div class="progress-fill" style="width:${Math.round(val/max*100)}%;background:${color};"></div></div>
+    </div>`;
+  return `
+  <div class="page-head"><div><div class="page-title">Reports</div><div class="page-desc">Office performance and constituency analytics</div></div></div>
+  <div class="grid grid-2" style="grid-template-columns:1fr 1fr;">
+    <div class="card">
+      <div class="section-title">This month — MP activity</div>
+      ${bar('Meetings held',86,100,'var(--teal)')}
+      ${bar('Constituency visits',6,8,'var(--gold)')}
+      ${bar('Cases resolved',34,60,'var(--teal)')}
+      ${bar('Cases pending',26,60,'var(--red)')}
+    </div>
+    <div class="card">
+      <div class="section-title">Appointment funnel</div>
+      ${bar('Requests received',142,142,'var(--blue)')}
+      ${bar('Approved',118,142,'var(--teal)')}
+      ${bar('Completed',101,142,'var(--teal)')}
+      ${bar('No-show',9,142,'var(--red)')}
+    </div>
+    <div class="card">
+      <div class="section-title">Cases by category</div>
+      ${['Road','Pension','Water','Electricity','Land','Education'].map((c,i)=>bar(c,[18,14,11,9,7,6][i],18,'var(--gold)')).join('')}
+    </div>
+    <div class="card">
+      <div class="section-title">Office / staff performance</div>
+      ${bar('Tasks completed on time',77,100,'var(--teal)')}
+      ${bar('Avg. response time (hrs, inverted)',68,100,'var(--blue)')}
+      ${bar('Overdue tasks',2,20,'var(--red)')}
+    </div>
+  </div>
+  `;
+}
+
+/* =========================================================
+   PAGE: AI ASSISTANT
+========================================================= */
+let chatHistory = [
+  {role:"ai",text:"Good morning. I can answer questions about today's schedule, cases, documents and visits — only for data your role can access. Try one of the questions below, or type your own."}
+];
+const chatSuggestions = [
+  "What does the MP have tomorrow?",
+  "Who are we meeting in Jhajha this week?",
+  "Show pending cases older than 15 days.",
+  "Prepare tomorrow's briefing.",
+  "Prepare a protocol draft for tomorrow's visit."
+];
+function pageAssistant(){
+  return `
+  <div class="page-head"><div><div class="page-title">AI Assistant</div><div class="page-desc">Answers are scoped to data your current role can access (${ROLES.find(r=>r.id===currentRole).label})</div></div></div>
+  <div class="chat-wrap">
+    <div class="chat-log" id="chat-log">
+      ${chatHistory.map(m=>`<div class="chat-msg ${m.role}">${esc(m.text)}</div>`).join('')}
+    </div>
+    <div class="chat-suggest">${chatSuggestions.map(s=>`<div class="chip-btn" data-action="chat-suggest" data-q="${esc(s)}">${s}</div>`).join('')}</div>
+    <div class="chat-input-row">
+      <input id="chat-input" placeholder="Ask about today's meetings, cases, documents…">
+      <button class="btn btn-primary" data-action="chat-send">Send</button>
+    </div>
+  </div>
+  `;
+}
+function aiAnswer(q){
+  const ql = q.toLowerCase();
+  if(ql.includes('tomorrow') && ql.includes('briefing')){
+    return "Tomorrow's briefing:\n— No confirmed meetings yet; 1 pending request (Sono Traders follow-up)\n— Chakai school inauguration visit planned for 28 Sep\n— 2 tasks due\nWould you like me to draft calendar holds for the pending items?";
+  }
+  if(ql.includes('tomorrow')){
+    return "Tomorrow currently has no confirmed meetings on the calendar. The Chakai visit is planned for 28 September, and 2 tasks are due tomorrow: 'Send infrastructure document to PWD department' and 'Confirm Jhajha visit route with local police'.";
+  }
+  if(ql.includes('jhajha') && ql.includes('week')){
+    return "This week in Jhajha:\n— Today, 1:00 PM: Constituency visit (community meeting, infrastructure review, local delegation)\n— Ramesh Pandey (District Administration) at 9:30 AM regarding the Jhajha road stretch\n— Case CS-2201 (road) and CS-2131 (education) are both open in Jhajha";
+  }
+  if(ql.includes('pending') && ql.includes('case')){
+    const old = DB.cases.filter(c=>c.days>15 && c.status!=='Resolved');
+    return `${old.length} cases have been open more than 15 days:\n` + old.map(c=>`— ${c.id} · ${c.citizen} · ${c.category} · ${c.location} · ${c.days} days`).join('\n');
+  }
+  if(ql.includes('protocol') && ql.includes('draft')){
+    return "Draft protocol communication — Jhajha visit:\n\n\"The office of Hon. Arun Bharti, MP, Jamui, wishes to inform the district administration and Jhajha police station of a scheduled constituency visit today, arriving 11:30 AM. Local coordination is requested for the community meeting and infrastructure review segments.\"\n\nThis draft needs staff review before it can be sent for approval.";
+  }
+  if(ql.includes('letter') || ql.includes('document') || ql.includes('read this')){
+    return "Opening the Documents module would let me read an uploaded letter and extract the event, date, location and suggested actions. Try the Documents section and click 'Analyze with AI' on the Jhajha invitation.";
+  }
+  if(ql.includes('birthday') || ql.includes('important date')){
+    return `Today's important dates: ${DB.importantDates.map(d=>`${d.name} (${d.occasion})`).join(', ')}.`;
+  }
+  if(ql.includes('meeting') && (ql.includes('today') || ql.includes('how many'))){
+    return `There are ${DB.appointments.length} meetings today: ${DB.appointments.map(a=>a.time).join(', ')}.`;
+  }
+  return "I can help with today's schedule, appointments, cases, documents, visits and protocol status. Could you rephrase, or try one of the suggested questions below?";
+}
+
+/* =========================================================
+   PAGE: SETTINGS
+========================================================= */
+let settingsTab = "users";
+function pageSettings(){
+  const tabs = [["users","Users & roles"],["capacity","Appointment rules"],["branding","Office branding"],["audit","Audit log"]];
+  let body='';
+  if(settingsTab==="users"){
+    body = `<div class="card"><table><thead><tr><th>User</th><th>Role</th><th>Status</th></tr></thead><tbody>
+      ${ROLES.map((r,i)=>`<tr><td>${["Arun Bharti","Priya Nair","Suresh Ojha","Puja Bharti","Manish Thakur","Alok Verma","Divya Rani","Rajeev Kumar"][i]}</td><td>${r.label}</td><td><span class="tag tag-teal">Active</span></td></tr>`).join('')}
+    </tbody></table></div>`;
+  } else if(settingsTab==="capacity"){
+    body = `<div class="card">${Object.entries(DB.capacity).map(([k,v])=>`
+      <div class="field-row" style="align-items:end;margin-bottom:4px;">
+        <div class="field"><label>${k} — daily maximum</label><input type="number" value="${v.max}" data-action="set-capacity" data-key="${k}" min="0"></div>
+        <div class="field"><label>Currently used today</label><input value="${v.used}" disabled></div>
+      </div>`).join('')}</div>`;
+  } else if(settingsTab==="branding"){
+    body = `<div class="card">
+      <div class="kv"><span class="k">MP name</span><span>${OFFICE.mp}</span></div>
+      <div class="kv"><span class="k">Constituency</span><span>${OFFICE.constituency} Lok Sabha, ${OFFICE.state}</span></div>
+      <div class="kv"><span class="k">Office</span><span>${OFFICE.officeName}</span></div>
+      <div class="kv"><span class="k">Letterhead</span><span style="color:var(--text-faint);">Configured — demonstration template</span></div>
+      <div class="role-note">Branding, letterhead and signature assets are configured per office in the multi-office architecture, so this instance can later be white-labelled for another MP.</div>
+    </div>`;
+  } else if(settingsTab==="audit"){
+    body = `<div class="card">${DB.auditLog.map(a=>`<div class="list-row"><div class="row-time">${a.time}</div><div class="row-main row-title">${esc(a.text)}</div></div>`).join('')}</div>`;
+  }
+  return `
+  <div class="page-head"><div><div class="page-title">Settings</div><div class="page-desc">Users, permissions, appointment rules and office configuration</div></div></div>
+  <div class="tabbar">${tabs.map(([k,l])=>`<div class="tab ${settingsTab===k?'active':''}" data-action="settings-tab" data-val="${k}">${l}</div>`).join('')}</div>
+  ${body}
+  `;
+}
+
+/* =========================================================
+   MAIN RENDER
+========================================================= */
+const PAGES = {
+  command:pageCommand, appointments:pageAppointments, calendar:pageCalendar,
+  constituency:pageConstituency, cases:pageCases, visits:pageVisits, protocol:pageProtocol,
+  people:pagePeople, volunteers:pageVolunteers, documents:pageDocuments, communications:pageCommunications,
+  dates:pageDates, tasks:pageTasks, reports:pageReports, assistant:pageAssistant, settings:pageSettings,
+};
+
+function renderAll(){
+  renderSidebar();
+  renderTopbar();
+  document.getElementById('content').innerHTML = PAGES[route]();
+  if(route==='documents' && window.__openDoc){
+    const d = DB.documents.find(x=>x.id===window.__openDoc);
+    if(d) document.getElementById('doc-detail').innerHTML = docDetailHTML(d);
+  }
+  bindContentActions();
+}
+
+/* =========================================================
+   EVENT DELEGATION
+========================================================= */
+function openModal(html){
+  document.getElementById('modal-box').innerHTML = html;
+  document.getElementById('modal-overlay').classList.add('show');
+}
+function closeModal(){ document.getElementById('modal-overlay').classList.remove('show'); }
+document.getElementById('modal-overlay').addEventListener('click',e=>{ if(e.target.id==='modal-overlay') closeModal(); });
+
+function bindContentActions(){
+  document.querySelectorAll('[data-nav]').forEach(el=>{
+    el.addEventListener('click',()=>{ route=el.dataset.nav; renderAll(); });
+  });
+
+  const click = (sel,fn)=>document.querySelectorAll(sel).forEach(el=>el.addEventListener('click',fn));
+
+  click('[data-action="prepare-day"]', ()=>{ document.getElementById('briefing-box').classList.add('show'); toast('Briefing prepared'); });
+
+  click('[data-action="open-new-appt"]', ()=> openModal(modalNewAppointment()));
+  click('[data-action="view-appt"]', function(){ openModal(modalViewAppointment(this.dataset.id)); });
+  click('[data-action="close-modal"]', closeModal);
+  click('[data-action="submit-appt"]', ()=>{
+    const name = document.getElementById('f-name').value || "New visitor";
+    const org = document.getElementById('f-org').value || "—";
+    const type = document.getElementById('f-type').value;
+    const time = document.getElementById('f-time').value || "TBD";
+    const priority = document.getElementById('f-priority').value;
+    const purpose = document.getElementById('f-purpose').value || "—";
+    const id = "AP-"+Math.floor(100+Math.random()*800);
+    DB.appointments.push({id,name,org,phone:document.getElementById('f-phone').value||"—",type,time,status:"Pending",priority,purpose});
+    if(DB.capacity[type]) DB.capacity[type].used++;
+    log(`PA created appointment ${id} (${type} — ${name})`);
+    closeModal(); route="appointments"; renderAll(); toast('Appointment created');
+  });
+  click('[data-action="confirm-appt"]', function(){ const a=DB.appointments.find(x=>x.id===this.dataset.id); a.status="Confirmed"; log(`Appointment ${a.id} confirmed`); closeModal(); renderAll(); toast('Appointment confirmed'); });
+  click('[data-action="reject-appt"]', function(){ const a=DB.appointments.find(x=>x.id===this.dataset.id); a.status="Declined"; log(`Appointment ${a.id} declined`); closeModal(); renderAll(); toast('Appointment declined'); });
+
+  click('[data-action="case-filter"]', function(){ caseFilter=this.dataset.val; renderAll(); });
+  click('[data-action="people-filter"]', function(){ peopleFilter=this.dataset.val; renderAll(); });
+  click('[data-action="settings-tab"]', function(){ settingsTab=this.dataset.val; renderAll(); });
+
+  click('[data-action="advance-protocol"]', ()=>{
+    const steps=DB.protocol["VS-14"]; let d=DB.protocolProgress["VS-14"];
+    if(d < steps.length){ DB.protocolProgress["VS-14"] = d+1; log(`Protocol advanced to '${steps[d]}'`); toast(steps[d]+' completed'); }
+    renderAll();
+  });
+
+  click('[data-action="open-document"]', function(){ window.__openDoc=this.dataset.id; const d=DB.documents.find(x=>x.id===this.dataset.id); d.status="Read"; renderAll(); });
+  click('[data-action="analyze-doc"]', function(){ docExtracted[this.dataset.id]=true; log('AI extracted structured data from document'); const d=DB.documents.find(x=>x.id===this.dataset.id); document.getElementById('doc-detail').innerHTML=docDetailHTML(d); toast('Document analyzed'); });
+  click('[data-action="doc-action"]', function(){
+    const idx=this.dataset.idx; const label=DB.documents.find(x=>x.id===this.dataset.id).extraction.actions[idx];
+    log(`AI action executed: ${label}`); toast(`${label} — done`);
+    this.textContent='Done'; this.disabled=true;
+  });
+  click('[data-action="simulate-upload"]', ()=>{ toast('Document received — added to inbox'); });
+
+  click('[data-action="prepare-greeting"]', function(){ toast(`Greeting drafted for ${this.dataset.name} — pending approval`); log(`AI drafted greeting for ${this.dataset.name}`); });
+  click('[data-action="send-template"]', function(){ const c=DB.communications[this.dataset.idx]; if(c.approval){ toast('Sent for approval'); log(`Communication '${c.name}' sent for approval`);} else { toast('Sent'); log(`Communication '${c.name}' sent`);} });
+
+  click('[data-action="complete-task"]', function(){ const t=DB.tasks.find(x=>x.id===this.dataset.id); t.status="done"; log(`Task completed: ${t.title}`); renderAll(); toast('Task completed'); });
+
+  click('[data-action="set-capacity"]', function(){ DB.capacity[this.dataset.key].max = parseInt(this.value)||0; toast('Capacity updated'); });
+
+  click('[data-action="chat-send"]', sendChat);
+  const ci=document.getElementById('chat-input');
+  if(ci) ci.addEventListener('keydown', e=>{ if(e.key==='Enter') sendChat(); });
+  click('[data-action="chat-suggest"]', function(){ chatHistory.push({role:'user',text:this.dataset.q}); chatHistory.push({role:'ai',text:aiAnswer(this.dataset.q)}); renderAll(); scrollChat(); });
+}
+function sendChat(){
+  const inp=document.getElementById('chat-input'); if(!inp || !inp.value.trim()) return;
+  const q=inp.value.trim(); chatHistory.push({role:'user',text:q});
+  chatHistory.push({role:'ai',text:aiAnswer(q)});
+  renderAll(); scrollChat();
+}
+function scrollChat(){ const l=document.getElementById('chat-log'); if(l) l.scrollTop=l.scrollHeight; }
+
+/* NOTIFICATIONS */
+document.getElementById('notif-btn').addEventListener('click', e=>{
+  e.stopPropagation();
+  const p=document.getElementById('notif-panel');
+  p.innerHTML = `<div class="notif-head">Notifications</div>` + DB.notifications.map(n=>`<div class="notif-item"><div class="ndot"></div><div><div>${esc(n.text)}</div><div class="notif-time">${n.time}</div></div></div>`).join('');
+  p.classList.toggle('show');
+});
+document.addEventListener('click', ()=>document.getElementById('notif-panel').classList.remove('show'));
+
+/* GLOBAL SEARCH */
+document.getElementById('global-search').addEventListener('input', function(){
+  const q=this.value.trim().toLowerCase();
+  const box=document.getElementById('search-results');
+  if(!q){ box.classList.remove('show'); return; }
+  const appts = DB.appointments.filter(a=>a.name.toLowerCase().includes(q)||a.purpose.toLowerCase().includes(q));
+  const cases = DB.cases.filter(c=>c.citizen.toLowerCase().includes(q)||c.category.toLowerCase().includes(q)||c.location.toLowerCase().includes(q));
+  const people = DB.people.filter(p=>p.name.toLowerCase().includes(q)||p.role.toLowerCase().includes(q));
+  const docs = DB.documents.filter(d=>d.name.toLowerCase().includes(q));
+  const tasks = DB.tasks.filter(t=>t.title.toLowerCase().includes(q));
+  const groups = [["Appointments",appts.map(a=>`${a.name} — ${a.time}`)],["Cases",cases.map(c=>`${c.id} · ${c.citizen} · ${c.category}`)],["People",people.map(p=>`${p.name} — ${p.role}`)],["Documents",docs.map(d=>d.name)],["Tasks",tasks.map(t=>t.title)]].filter(g=>g[1].length);
+  box.innerHTML = groups.length ? groups.map(([label,items])=>`<div class="sr-group"><div class="sr-group-title">${label}</div>${items.map(i=>`<div class="sr-item">${esc(i)}</div>`).join('')}</div>`).join('') : `<div class="sr-group"><div class="sr-item" style="color:var(--text-faint);">No matches</div></div>`;
+  box.classList.add('show');
+});
+document.addEventListener('click', e=>{ if(!e.target.closest('#search-wrap')) document.getElementById('search-results').classList.remove('show'); });
+
+/* INIT */
+renderAll();
+</script>
+</body>
+</html>
