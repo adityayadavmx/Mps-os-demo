@@ -1,0 +1,2054 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IndianPol — MP Operating System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Newsreader:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0A1119;
+  --bg-elev:#0E1826;
+  --panel:#121F30;
+  --panel-hover:#17283D;
+  --border:#213247;
+  --border-soft:#182534;
+  --text:#EAF0F6;
+  --text-dim:#8FA2B8;
+  --text-faint:#54607A;
+  --teal:#33CE9F;
+  --teal-dim:rgba(51,206,159,.13);
+  --gold:#CBA24E;
+  --gold-dim:rgba(203,162,78,.15);
+  --red:#E4695D;
+  --red-dim:rgba(228,105,93,.14);
+  --blue:#5D93F2;
+  --blue-dim:rgba(93,147,242,.13);
+  --radius:7px;
+  --radius-sm:4px;
+  --sans:'IBM Plex Sans',-apple-system,sans-serif;
+  --mono:'IBM Plex Mono',monospace;
+  --serif:'Newsreader',serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--sans);
+  font-size:13.5px;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+::selection{background:var(--teal-dim);color:var(--teal);}
+::-webkit-scrollbar{width:8px;height:8px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+a{color:inherit;text-decoration:none;}
+button{font-family:inherit;cursor:pointer;}
+input,select,textarea{font-family:inherit;font-size:inherit;color:var(--text);}
+
+/* ---------- APP SHELL ---------- */
+#app{display:flex;height:100vh;overflow:hidden;}
+
+/* SIDEBAR */
+#sidebar{
+  width:236px;flex:none;background:var(--bg-elev);
+  border-right:1px solid var(--border-soft);
+  display:flex;flex-direction:column;
+  height:100vh;transition:width .18s ease;
+}
+.brand{
+  padding:18px 18px 14px 18px;
+  border-bottom:1px solid var(--border-soft);
+}
+.brand-mark{display:flex;align-items:center;gap:9px;}
+.brand-glyph{
+  width:26px;height:26px;border-radius:6px;
+  background:linear-gradient(155deg,#1B2E45,#0E1826);
+  border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--serif);font-style:italic;font-size:14px;color:var(--gold);
+}
+.brand-name{font-weight:600;font-size:14.5px;letter-spacing:.01em;}
+.brand-sub{font-size:10.5px;color:var(--text-faint);margin-top:2px;padding-left:1px;}
+.demo-chip{
+  margin-top:10px;display:inline-flex;align-items:center;gap:5px;
+  background:var(--gold-dim);color:var(--gold);border:1px solid rgba(203,162,78,.3);
+  padding:3px 8px;border-radius:20px;font-size:10px;font-weight:500;
+}
+.demo-chip::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--gold);}
+
+.nav-scroll{flex:1;overflow-y:auto;padding:10px 10px;}
+.nav-item{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 10px;border-radius:var(--radius-sm);
+  color:var(--text-dim);font-size:13px;cursor:pointer;
+  border:1px solid transparent;
+}
+.nav-item:hover{background:var(--panel-hover);color:var(--text);}
+.nav-item.active{background:var(--panel);color:var(--text);border-color:var(--border);}
+.nav-item.active .nav-dot{background:var(--teal);}
+.nav-dot{width:5px;height:5px;border-radius:50%;background:var(--text-faint);flex:none;}
+.nav-item .nav-badge{
+  margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--text-faint);
+  background:var(--bg);border:1px solid var(--border-soft);padding:1px 6px;border-radius:10px;
+}
+.nav-item.active .nav-badge{color:var(--teal);border-color:rgba(51,206,159,.3);}
+.nav-item .nav-badge.urgent{color:var(--gold);border-color:rgba(203,162,78,.35);}
+.nav-divider{height:1px;background:var(--border-soft);margin:8px 4px;}
+
+.sidebar-footer{padding:12px;border-top:1px solid var(--border-soft);}
+.role-box{
+  background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-sm);
+  padding:8px 10px;
+}
+.role-box label{display:block;font-size:9.5px;color:var(--text-faint);margin-bottom:4px;}
+.role-box select{
+  width:100%;background:transparent;border:none;color:var(--text);font-size:12.5px;font-weight:500;
+  outline:none;
+}
+.role-box select option{background:var(--panel);}
+
+/* MAIN */
+#main-wrap{flex:1;display:flex;flex-direction:column;height:100vh;overflow:hidden;}
+#topbar{
+  height:56px;flex:none;border-bottom:1px solid var(--border-soft);
+  display:flex;align-items:center;gap:16px;padding:0 20px;background:var(--bg);
+}
+.topbar-title{font-weight:600;font-size:15px;}
+.topbar-sub{font-size:11.5px;color:var(--text-faint);}
+#search-wrap{flex:1;max-width:420px;position:relative;margin-left:8px;}
+#global-search{
+  width:100%;background:var(--panel);border:1px solid var(--border);
+  border-radius:var(--radius-sm);padding:7px 34px 7px 30px;font-size:12.5px;color:var(--text);
+  outline:none;
+}
+#global-search:focus{border-color:var(--teal);}
+#search-wrap::before{
+  content:'';position:absolute;left:11px;top:50%;transform:translateY(-50%);
+  width:11px;height:11px;border:1.5px solid var(--text-faint);border-radius:50%;
+}
+#search-wrap::after{
+  content:'';position:absolute;left:19px;top:63%;width:5px;height:1.5px;background:var(--text-faint);
+  transform:rotate(45deg);
+}
+.kbd-hint{position:absolute;right:9px;top:50%;transform:translateY(-50%);font-family:var(--mono);font-size:9.5px;color:var(--text-faint);border:1px solid var(--border);padding:1px 5px;border-radius:3px;pointer-events:none;}
+#search-results{
+  position:absolute;top:36px;left:0;right:0;background:var(--panel);
+  border:1px solid var(--border);border-radius:var(--radius);
+  max-height:400px;overflow-y:auto;display:none;z-index:50;
+  box-shadow:0 12px 32px rgba(0,0,0,.45);
+}
+#search-results.show{display:block;}
+.sr-group{padding:6px 10px;}
+.sr-group-title{font-size:10px;color:var(--text-faint);padding:6px 4px 4px;}
+.sr-item{padding:7px 8px;border-radius:var(--radius-sm);cursor:pointer;font-size:12.5px;}
+.sr-item:hover{background:var(--panel-hover);}
+.sr-item .sr-meta{color:var(--text-faint);font-size:11px;}
+.sr-ask{margin:4px 10px 8px;padding:8px 10px;border-radius:var(--radius-sm);background:var(--teal-dim);color:var(--teal);font-size:12px;font-weight:500;cursor:pointer;border:1px solid rgba(51,206,159,.3);}
+
+.topbar-actions{display:flex;align-items:center;gap:10px;margin-left:auto;}
+.icon-btn{
+  width:32px;height:32px;border-radius:var(--radius-sm);border:1px solid var(--border);
+  background:var(--panel);display:flex;align-items:center;justify-content:center;
+  color:var(--text-dim);position:relative;font-size:13px;
+}
+.icon-btn:hover{background:var(--panel-hover);color:var(--text);}
+.icon-btn .dot{
+  position:absolute;top:5px;right:5px;width:7px;height:7px;border-radius:50%;
+  background:var(--red);border:1.5px solid var(--bg);
+}
+.avatar{
+  width:32px;height:32px;border-radius:50%;background:linear-gradient(160deg,#1E3350,#0E1826);
+  border:1px solid var(--border);display:flex;align-items:center;justify-content:center;
+  font-size:11.5px;font-weight:600;color:var(--gold);
+}
+#notif-panel{
+  position:absolute;top:52px;right:70px;width:340px;background:var(--panel);
+  border:1px solid var(--border);border-radius:var(--radius);z-index:60;display:none;
+  box-shadow:0 12px 32px rgba(0,0,0,.45);
+}
+#notif-panel.show{display:block;}
+.notif-head{padding:12px 14px;border-bottom:1px solid var(--border-soft);font-weight:600;font-size:13px;}
+.notif-item{padding:10px 14px;border-bottom:1px solid var(--border-soft);font-size:12px;display:flex;gap:8px;}
+.notif-item:last-child{border-bottom:none;}
+.notif-item .ndot{width:6px;height:6px;border-radius:50%;background:var(--teal);margin-top:5px;flex:none;}
+.notif-time{color:var(--text-faint);font-size:10.5px;margin-top:2px;}
+
+#content{flex:1;overflow-y:auto;padding:22px 26px 60px;}
+
+/* ---------- SHARED COMPONENTS ---------- */
+.page-head{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px;}
+.page-title{font-size:19px;font-weight:600;letter-spacing:-.01em;}
+.page-desc{color:var(--text-dim);font-size:12.5px;margin-top:3px;}
+.btn{
+  display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:var(--radius-sm);
+  border:1px solid var(--border);background:var(--panel);color:var(--text);font-size:12.5px;font-weight:500;
+  transition:background .12s ease;
+}
+.btn:hover{background:var(--panel-hover);}
+.btn-primary{background:var(--teal);border-color:var(--teal);color:#06201A;font-weight:600;}
+.btn-primary:hover{background:#3DE0AF;}
+.btn-gold{background:var(--gold);border-color:var(--gold);color:#241A05;font-weight:600;}
+.btn-gold:hover{background:#DBB25E;}
+.btn-red{background:transparent;border-color:rgba(228,105,93,.4);color:var(--red);}
+.btn-red:hover{background:var(--red-dim);}
+.btn-ghost{background:transparent;}
+.btn-sm{padding:5px 10px;font-size:11.5px;}
+.btn:disabled{opacity:.4;cursor:not-allowed;}
+
+.grid{display:grid;gap:14px;}
+.grid-4{grid-template-columns:repeat(4,1fr);}
+.grid-3{grid-template-columns:repeat(3,1fr);}
+.grid-2{grid-template-columns:repeat(2,1fr);}
+.grid-5{grid-template-columns:repeat(5,1fr);}
+@media(max-width:1100px){.grid-4{grid-template-columns:repeat(2,1fr);}.grid-3{grid-template-columns:repeat(2,1fr);}.grid-5{grid-template-columns:repeat(2,1fr);}}
+
+.card{background:var(--panel);border:1px solid var(--border-soft);border-radius:var(--radius);padding:16px;}
+.card-tight{padding:12px 14px;}
+.stat-card .stat-label{font-size:11px;color:var(--text-faint);margin-bottom:8px;}
+.stat-card .stat-value{font-family:var(--mono);font-size:26px;font-weight:600;}
+.stat-card.compact .stat-value{font-size:20px;}
+.stat-card .stat-foot{font-size:11px;color:var(--text-dim);margin-top:6px;}
+.stat-card .stat-foot.up{color:var(--teal);}
+.stat-card .stat-foot.warn{color:var(--gold);}
+.stat-card .stat-foot.bad{color:var(--red);}
+
+.section-title{font-size:13.5px;font-weight:600;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.section-title .link{font-size:11.5px;font-weight:500;color:var(--teal);cursor:pointer;}
+
+.tag{
+  display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:10.5px;font-weight:500;
+  border:1px solid transparent;white-space:nowrap;
+}
+.tag-teal{background:var(--teal-dim);color:var(--teal);border-color:rgba(51,206,159,.3);}
+.tag-gold{background:var(--gold-dim);color:var(--gold);border-color:rgba(203,162,78,.3);}
+.tag-red{background:var(--red-dim);color:var(--red);border-color:rgba(228,105,93,.3);}
+.tag-blue{background:var(--blue-dim);color:var(--blue);border-color:rgba(93,147,242,.3);}
+.tag-gray{background:var(--bg-elev);color:var(--text-dim);border-color:var(--border);}
+
+.ai-chip{
+  display:inline-flex;align-items:center;gap:5px;font-size:9.5px;letter-spacing:.02em;font-weight:600;
+  color:var(--blue);background:var(--blue-dim);border:1px solid rgba(93,147,242,.3);
+  padding:2px 7px;border-radius:4px;
+}
+.ai-chip::before{content:'◆';font-size:7px;}
+.ai-chip.summary{color:var(--teal);background:var(--teal-dim);border-color:rgba(51,206,159,.3);}
+.ai-chip.suggestion{color:var(--gold);background:var(--gold-dim);border-color:rgba(203,162,78,.3);}
+.ai-box{background:var(--bg-elev);border:1px solid var(--border-soft);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:12px;}
+.ai-box .ai-text{font-size:12.5px;color:var(--text-dim);margin-top:8px;line-height:1.6;white-space:pre-line;}
+.ai-loading{font-size:12px;color:var(--text-faint);display:flex;align-items:center;gap:8px;padding:8px 0;}
+.spin{width:12px;height:12px;border-radius:50%;border:2px solid var(--border);border-top-color:var(--teal);animation:spin .7s linear infinite;flex:none;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+table{width:100%;border-collapse:collapse;}
+th{
+  text-align:left;font-size:10.5px;color:var(--text-faint);font-weight:500;
+  padding:0 10px 8px;border-bottom:1px solid var(--border-soft);
+}
+td{padding:10px 10px;border-bottom:1px solid var(--border-soft);font-size:12.5px;vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr.row-hover:hover{background:var(--panel-hover);cursor:pointer;}
+
+.list-row{display:flex;align-items:center;gap:10px;padding:9px 4px;border-bottom:1px solid var(--border-soft);}
+.list-row:last-child{border-bottom:none;}
+.list-row.row-hover{cursor:pointer;border-radius:var(--radius-sm);}
+.list-row.row-hover:hover{background:var(--panel-hover);}
+.row-time{font-family:var(--mono);font-size:11.5px;color:var(--text-dim);width:60px;flex:none;}
+.row-main{flex:1;min-width:0;}
+.row-title{font-size:12.5px;font-weight:500;}
+.row-sub{font-size:11px;color:var(--text-faint);margin-top:1px;}
+
+.empty{padding:32px 10px;text-align:center;color:var(--text-faint);font-size:12px;}
+.empty .empty-title{color:var(--text-dim);font-size:13px;margin-bottom:4px;font-weight:500;}
+
+.progress-track{height:5px;background:var(--bg-elev);border-radius:4px;overflow:hidden;margin-top:6px;}
+.progress-fill{height:100%;background:var(--teal);border-radius:4px;}
+.progress-fill.warn{background:var(--gold);}
+.progress-fill.full{background:var(--red);}
+
+.checklist-item{display:flex;align-items:center;gap:10px;padding:9px 4px;border-bottom:1px solid var(--border-soft);}
+.checklist-item:last-child{border-bottom:none;}
+.check-circle{
+  width:17px;height:17px;border-radius:50%;border:1.5px solid var(--border);flex:none;
+  display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--bg);
+}
+.check-circle.done{background:var(--teal);border-color:var(--teal);}
+.check-circle.current{border-color:var(--gold);}
+.check-label{font-size:12.5px;}
+.check-label.done{color:var(--text-dim);}
+.check-label.current{color:var(--text);font-weight:500;}
+
+/* TIMELINE */
+.tl{position:relative;padding-left:18px;}
+.tl-item{position:relative;padding-bottom:16px;}
+.tl-item:last-child{padding-bottom:0;}
+.tl-item::before{content:'';position:absolute;left:-14px;top:3px;width:7px;height:7px;border-radius:50%;background:var(--teal);}
+.tl-item::after{content:'';position:absolute;left:-11.5px;top:12px;bottom:-4px;width:1px;background:var(--border-soft);}
+.tl-item:last-child::after{display:none;}
+.tl-date{font-family:var(--mono);font-size:10.5px;color:var(--text-faint);}
+.tl-text{font-size:12.5px;margin-top:2px;}
+
+/* HERO / BRIEFING */
+.hero-card{
+  background:linear-gradient(150deg,var(--panel) 0%,var(--bg-elev) 100%);
+  border:1px solid var(--border-soft);border-radius:10px;padding:22px 24px;margin-bottom:18px;
+  position:relative;overflow:hidden;
+}
+.hero-eyebrow{font-size:11px;color:var(--text-faint);margin-bottom:6px;}
+.hero-greeting{font-family:var(--serif);font-style:italic;font-size:23px;color:var(--text);margin-bottom:14px;}
+.hero-stats{display:flex;gap:28px;flex-wrap:wrap;margin-top:6px;}
+.hero-stat b{font-family:var(--mono);font-size:20px;display:block;color:var(--text);}
+.hero-stat span{font-size:11px;color:var(--text-faint);}
+.briefing-box{
+  margin-top:16px;background:var(--bg);border:1px solid var(--border-soft);border-radius:var(--radius);
+  padding:14px 16px;display:none;
+}
+.briefing-box.show{display:block;}
+.briefing-box ul{list-style:none;margin-top:8px;}
+.briefing-box li{padding:4px 0 4px 14px;position:relative;font-size:12.5px;color:var(--text-dim);}
+.briefing-box li::before{content:'—';position:absolute;left:0;color:var(--text-faint);}
+
+/* MODALS */
+.overlay{
+  position:fixed;inset:0;background:rgba(4,8,13,.65);backdrop-filter:blur(2px);
+  display:none;align-items:flex-start;justify-content:center;z-index:100;padding:40px 20px;overflow-y:auto;
+}
+.overlay.show{display:flex;}
+.modal{
+  background:var(--panel);border:1px solid var(--border);border-radius:10px;
+  width:100%;max-width:560px;box-shadow:0 24px 60px rgba(0,0,0,.5);
+}
+.modal.modal-lg{max-width:780px;}
+.modal-head{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border-soft);gap:10px;}
+.modal-head h3{font-size:14.5px;font-weight:600;}
+.modal-head .mh-sub{font-size:11px;color:var(--text-faint);margin-top:2px;font-weight:400;}
+.modal-close{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--text-faint);border:1px solid var(--border);background:transparent;flex:none;}
+.modal-close:hover{background:var(--panel-hover);color:var(--text);}
+.modal-body{padding:18px 20px;max-height:70vh;overflow-y:auto;}
+.modal-foot{display:flex;justify-content:flex-end;gap:8px;padding:14px 20px;border-top:1px solid var(--border-soft);flex-wrap:wrap;}
+.modal-foot.between{justify-content:space-between;}
+
+.field{margin-bottom:13px;}
+.field label{display:block;font-size:11.5px;color:var(--text-dim);margin-bottom:5px;font-weight:500;}
+.field input,.field select,.field textarea{
+  width:100%;background:var(--bg-elev);border:1px solid var(--border);border-radius:var(--radius-sm);
+  padding:8px 10px;outline:none;
+}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--teal);}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+
+.mtabbar{display:flex;gap:2px;border-bottom:1px solid var(--border-soft);padding:0 20px;overflow-x:auto;}
+.mtab{padding:9px 10px;font-size:11.5px;color:var(--text-dim);border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;}
+.mtab:hover{color:var(--text);}
+.mtab.active{color:var(--text);border-color:var(--teal);font-weight:500;}
+
+/* TOAST */
+#toast-wrap{position:fixed;bottom:20px;right:20px;z-index:200;display:flex;flex-direction:column;gap:8px;}
+.toast{
+  background:var(--panel);border:1px solid var(--border);border-left:3px solid var(--teal);
+  border-radius:var(--radius-sm);padding:10px 14px;font-size:12.5px;box-shadow:0 8px 24px rgba(0,0,0,.4);
+  min-width:240px;animation:toastin .25s ease;
+}
+@keyframes toastin{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+
+/* TABS */
+.tabbar{display:flex;gap:4px;border-bottom:1px solid var(--border-soft);margin-bottom:16px;overflow-x:auto;}
+.tab{padding:8px 12px;font-size:12.5px;color:var(--text-dim);border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;}
+.tab:hover{color:var(--text);}
+.tab.active{color:var(--text);border-color:var(--teal);font-weight:500;}
+
+/* CHAT (AI Assistant) */
+.chat-wrap{display:flex;flex-direction:column;height:calc(100vh - 180px);border:1px solid var(--border-soft);border-radius:var(--radius);background:var(--panel);}
+.chat-log{flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:14px;}
+.chat-msg{max-width:78%;font-size:12.5px;line-height:1.55;}
+.chat-msg.user{align-self:flex-end;background:var(--teal-dim);color:var(--text);border:1px solid rgba(51,206,159,.25);border-radius:10px 10px 2px 10px;padding:9px 13px;}
+.chat-msg.ai{align-self:flex-start;background:var(--bg-elev);border:1px solid var(--border-soft);border-radius:10px 10px 10px 2px;padding:11px 14px;white-space:pre-line;}
+.chat-suggest{display:flex;flex-wrap:wrap;gap:6px;padding:0 18px 12px;}
+.chip-btn{border:1px solid var(--border);background:var(--bg-elev);color:var(--text-dim);padding:5px 10px;border-radius:20px;font-size:11px;}
+.chip-btn:hover{border-color:var(--teal);color:var(--teal);}
+.chat-input-row{display:flex;gap:8px;padding:12px;border-top:1px solid var(--border-soft);}
+.chat-input-row input{flex:1;background:var(--bg-elev);border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 12px;outline:none;}
+.chat-input-row input:focus{border-color:var(--teal);}
+
+/* CALENDAR */
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;}
+.cal-daylabel{font-size:10.5px;color:var(--text-faint);text-align:center;padding-bottom:4px;}
+.cal-cell{background:var(--bg-elev);border:1px solid var(--border-soft);border-radius:var(--radius-sm);min-height:88px;padding:6px;font-size:11px;}
+.cal-cell.today{border-color:var(--teal);}
+.cal-date{color:var(--text-faint);font-size:10.5px;margin-bottom:4px;}
+.cal-cell.today .cal-date{color:var(--teal);font-weight:600;}
+.cal-evt{background:var(--panel-hover);border-left:2px solid var(--blue);padding:2px 5px;border-radius:2px;margin-bottom:3px;font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.cal-evt.official{border-color:var(--gold);}
+.cal-evt.constituency{border-color:var(--teal);}
+.cal-evt.visit{border-color:var(--red);}
+
+/* MISC */
+.kv{display:flex;justify-content:space-between;gap:10px;font-size:12px;padding:6px 0;border-bottom:1px solid var(--border-soft);}
+.kv:last-child{border-bottom:none;}
+.kv .k{color:var(--text-faint);flex:none;}
+.kv .v{text-align:right;}
+.divider{height:1px;background:var(--border-soft);margin:16px 0;}
+.role-note{font-size:11px;color:var(--text-faint);margin-top:4px;}
+.avatar-sm{width:26px;height:26px;border-radius:50%;background:var(--bg-elev);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:var(--gold);flex:none;}
+.attn-item{display:flex;align-items:center;gap:10px;padding:9px 4px;border-bottom:1px solid var(--border-soft);cursor:pointer;border-radius:var(--radius-sm);}
+.attn-item:last-child{border-bottom:none;}
+.attn-item:hover{background:var(--panel-hover);}
+.attn-dot{width:7px;height:7px;border-radius:50%;flex:none;}
+.attn-dot.red{background:var(--red);}
+.attn-dot.gold{background:var(--gold);}
+.attn-dot.blue{background:var(--blue);}
+.link-mini{color:var(--teal);font-size:11px;cursor:pointer;}
+.note-item{background:var(--bg-elev);border:1px solid var(--border-soft);border-radius:var(--radius-sm);padding:8px 10px;font-size:12px;margin-bottom:6px;color:var(--text-dim);}
+
+@media(max-width:860px){
+  #sidebar{width:64px;}
+  #sidebar .brand-name,#sidebar .brand-sub,#sidebar .demo-chip,#sidebar .nav-item span:not(.nav-dot),#sidebar .nav-badge,#sidebar .role-box label,#sidebar .role-box select{display:none;}
+  #sidebar .brand{padding:14px 10px;display:flex;justify-content:center;}
+  #sidebar .nav-item{justify-content:center;}
+  .grid-4,.grid-3,.grid-5,.grid-2{grid-template-columns:1fr;}
+  #search-wrap{max-width:180px;}
+  .field-row{grid-template-columns:1fr;}
+  #content{padding:16px;}
+}
+</style>
+</head>
+<body>
+
+<div id="app">
+  <div id="sidebar">
+    <div class="brand">
+      <div class="brand-mark">
+        <div class="brand-glyph">IP</div>
+        <div>
+          <div class="brand-name">IndianPol</div>
+          <div class="brand-sub">MP Operating System</div>
+        </div>
+      </div>
+      <div class="demo-chip">Demonstration environment</div>
+    </div>
+    <div class="nav-scroll" id="nav-scroll"></div>
+    <div class="sidebar-footer">
+      <div class="role-box">
+        <label>Viewing as</label>
+        <select id="role-select"></select>
+      </div>
+    </div>
+  </div>
+
+  <div id="main-wrap">
+    <div id="topbar">
+      <div>
+        <div class="topbar-title" id="tb-title">Command Center</div>
+        <div class="topbar-sub" id="tb-sub">Arun Bharti Office · Jamui, Bihar</div>
+      </div>
+      <div id="search-wrap">
+        <input id="global-search" placeholder="Search people, cases, correspondence, documents…" autocomplete="off">
+        <span class="kbd-hint">⌘K</span>
+        <div id="search-results"></div>
+      </div>
+      <div class="topbar-actions">
+        <button class="icon-btn" id="notif-btn" title="Notifications">🔔<span class="dot" id="notif-dot"></span></button>
+        <div class="avatar" id="user-avatar">AB</div>
+      </div>
+      <div id="notif-panel"></div>
+    </div>
+    <div id="content"></div>
+  </div>
+</div>
+
+<div id="modal-overlay" class="overlay"><div class="modal" id="modal-box"></div></div>
+<div id="toast-wrap"></div>
+
+<script>
+/* =========================================================
+   DATA MODEL
+========================================================= */
+const OFFICE = { mp:"Hon. Arun Bharti", constituency:"Jamui", state:"Bihar", officeName:"Arun Bharti Office" };
+
+const ROLES = [
+  {id:"mp", label:"MP — Arun Bharti", approve:true},
+  {id:"pa", label:"PA / Personal Assistant", approve:false},
+  {id:"om", label:"Office Manager", approve:false},
+  {id:"cc", label:"Constituency Coordinator", approve:false},
+  {id:"pc", label:"Protocol Coordinator", approve:false},
+  {id:"cm", label:"Case / Grievance Manager", approve:false},
+  {id:"comm", label:"Communications Manager", approve:false},
+  {id:"admin", label:"Administrator", approve:true},
+];
+let currentRole = "pa";
+
+const CATEGORY_DEPT = {
+  "Road":"DP-PWD","Electricity":"DP-RD","Water":"DP-RD","Pension":"DP-RD",
+  "Education":"DP-EDU","Health":"DP-RD","Land":"DP-RD","Police / Administration":"DP-POL"
+};
+const APPROVAL_STAGES = ["AI Prepared","Staff Review","Authorized Approval","Approved","Dispatched"];
+const INBOX_STATUSES = ["NEW","AI ANALYZED","ASSIGNED","ACTION REQUIRED","WAITING","COMPLETED"];
+
+function seedDB(){ return {
+  appointments:[
+    {id:"AP-101",name:"Ramesh Pandey",org:"District Administration",phone:"98xxxxxx21",type:"Official",time:"09:30 AM",status:"Confirmed",priority:"High",purpose:"PWD road funding discussion — Jhajha stretch",completed:false},
+    {id:"AP-102",name:"Sunita Devi",org:"Citizen — Barhat",phone:"91xxxxxx08",type:"Constituency",time:"10:15 AM",status:"Confirmed",priority:"Medium",purpose:"Pension grievance follow-up",completed:false},
+    {id:"AP-103",name:"Er. Vikram Singh",org:"PWD, Jamui Division",phone:"99xxxxxx44",type:"Official",time:"11:00 AM",status:"Pending",priority:"High",purpose:"Jhajha road inspection report review",completed:false},
+    {id:"AP-104",name:"Dr. Neha Ranjan",org:"NITI Aayog (video call)",phone:"—",type:"Online",time:"12:00 PM",status:"Confirmed",priority:"Medium",purpose:"Aspirational block progress review",completed:false},
+    {id:"AP-105",name:"Sono Traders Association",org:"Delegation, 6 members",phone:"97xxxxxx19",type:"Delegation",time:"04:00 PM",status:"Confirmed",priority:"Medium",purpose:"Market infrastructure request",completed:false},
+    {id:"AP-106",name:"Anita Kumari",org:"Citizen — Jamui Sadar",phone:"90xxxxxx77",type:"Direct",time:"05:00 PM",status:"Pending",priority:"Low",purpose:"Scholarship eligibility query",completed:false},
+  ],
+  capacity:{ Direct:{used:6,max:8}, Online:{used:2,max:4}, Official:{used:2,max:3}, Delegation:{used:1,max:2} },
+  cases:[
+    {id:"CS-2201",citizen:"Manoj Yadav",location:"Jhajha",category:"Road",status:"Follow-up",priority:"High",days:16,deadline:"28 Sep",created:"09 Sep",updated:"24 Sep",nextAction:"Follow up with PWD Executive Engineer",
+      timeline:[{date:"09 Sep",text:"Complaint received"},{date:"09 Sep",text:"AI classified as infrastructure issue"},{date:"09 Sep",text:"Assigned to Case Manager"},{date:"10 Sep",text:"Letter drafted"},{date:"11 Sep",text:"Sent to department"},{date:"24 Sep",text:"Follow-up call made"}],
+      notes:["Citizen reachable only after 5 PM — village has limited network coverage."], docs:["Jhajha_Road_Photos.zip"]},
+    {id:"CS-2198",citizen:"Kiran Devi",location:"Chakai",category:"Electricity",status:"Assigned",priority:"Medium",days:4,deadline:"02 Oct",created:"21 Sep",updated:"22 Sep",nextAction:"Await department acknowledgement",timeline:[{date:"21 Sep",text:"Complaint received"},{date:"22 Sep",text:"Assigned to Case Manager"}],notes:[],docs:[]},
+    {id:"CS-2179",citizen:"Bharat Mahto",location:"Sono",category:"Pension",status:"Follow-up",priority:"High",days:19,deadline:"27 Sep",created:"06 Sep",updated:"23 Sep",nextAction:"Follow up on department response",timeline:[{date:"06 Sep",text:"Complaint received"},{date:"08 Sep",text:"Sent to department"},{date:"23 Sep",text:"Citizen called for status update"}],notes:[],docs:[]},
+    {id:"CS-2166",citizen:"Rina Kumari",location:"Jamui Sadar",category:"Water",status:"New",priority:"Medium",days:1,deadline:"05 Oct",created:"24 Sep",updated:"24 Sep",nextAction:"Assign to case manager",timeline:[{date:"24 Sep",text:"Complaint received"}],notes:[],docs:[]},
+    {id:"CS-2140",citizen:"Suresh Paswan",location:"Khaira",category:"Land",status:"Follow-up",priority:"High",days:23,deadline:"26 Sep",created:"02 Sep",updated:"20 Sep",nextAction:"Verify land dispute documents",timeline:[{date:"02 Sep",text:"Complaint received"},{date:"05 Sep",text:"Sent to department"},{date:"20 Sep",text:"Department requested additional documents"}],notes:[],docs:[]},
+    {id:"CS-2131",citizen:"Anjali Singh",location:"Jhajha",category:"Education",status:"In Progress",priority:"Low",days:9,deadline:"04 Oct",created:"16 Sep",updated:"21 Sep",nextAction:"Await scholarship department reply",timeline:[{date:"16 Sep",text:"Complaint received"},{date:"18 Sep",text:"Sent to department"}],notes:[],docs:[]},
+    {id:"CS-2119",citizen:"Deepak Ram",location:"Barhat",category:"Health",status:"Resolved",priority:"Medium",days:31,deadline:"—",created:"25 Aug",updated:"18 Sep",nextAction:"Closed",timeline:[{date:"25 Aug",text:"Complaint received"},{date:"18 Sep",text:"Resolved — citizen updated"}],notes:[],docs:[]},
+    {id:"CS-2098",citizen:"Farhana Khatoon",location:"Chakai",category:"Police / Administration",status:"Follow-up",priority:"High",days:17,deadline:"28 Sep",created:"08 Sep",updated:"22 Sep",nextAction:"Escalate to SP office",timeline:[{date:"08 Sep",text:"Complaint received"},{date:"10 Sep",text:"Sent to department"}],notes:[],docs:[]},
+  ],
+  visits:[
+    {id:"VS-14",place:"Jhajha",date:"Today, 25 Sep",purpose:"Constituency engagement",status:"Confirmed",
+      schedule:[["11:30","Arrival"],["12:00","Community Meeting"],["13:00","Infrastructure Review"],["14:00","Local Delegation"],["15:00","Departure"]],
+      checklist:[{label:"Vehicle arranged",done:true},{label:"Protocol coordination",done:true},{label:"Security coordination",done:false},{label:"Venue confirmed",done:true},{label:"Briefing documents prepared",done:false}]},
+    {id:"VS-15",place:"Chakai",date:"28 Sep",purpose:"School inauguration",status:"Planning",
+      schedule:[["10:00","Arrival"],["10:30","School Inauguration"],["12:00","Community Interaction"]],
+      checklist:[{label:"Vehicle arranged",done:false},{label:"Protocol coordination",done:false},{label:"Security coordination",done:false},{label:"Venue confirmed",done:true},{label:"Briefing documents prepared",done:false}]},
+    {id:"VS-16",place:"Barhat",date:"03 Oct",purpose:"Farmers' meeting",status:"Requested",
+      schedule:[["09:00","Arrival"],["09:30","Farmers' Meeting"]],
+      checklist:[{label:"Vehicle arranged",done:false},{label:"Protocol coordination",done:false},{label:"Security coordination",done:false},{label:"Venue confirmed",done:false},{label:"Briefing documents prepared",done:false}]},
+  ],
+  protocol:{ "VS-14":["Visit created","Location confirmed","Local coordinator assigned","Draft communication","Staff review","MP / authorized approval","Dispatch"] },
+  protocolProgress:{ "VS-14": 3 },
+  people:[
+    {name:"Dr. R.K. Sinha",role:"District Magistrate, Jamui",cat:"Official",area:"Jamui Sadar",phone:"94xxxxxx02",interactions:[]},
+    {name:"Ajay Kumar",role:"Superintendent of Police, Jamui",cat:"Official",area:"Jamui Sadar",phone:"94xxxxxx55",interactions:[]},
+    {name:"Manoj Yadav",role:"Citizen — road grievance",cat:"Citizen",area:"Jhajha",phone:"98xxxxxx31",
+      interactions:[{date:"09 Sep",text:"Case CS-2201 created — road complaint"},{date:"11 Sep",text:"Correspondence IP/JAM/2026/0048 sent to Rural Development Dept"},{date:"24 Sep",text:"Follow-up call made by office"}]},
+    {name:"Anita Kumari",role:"Citizen — scholarship query",cat:"Citizen",area:"Jamui Sadar",phone:"90xxxxxx77",
+      interactions:[{date:"25 Sep",text:"Appointment AP-106 requested"}]},
+    {name:"Puja Bharti",role:"Constituency Coordinator, Chakai",cat:"Volunteer",area:"Chakai",phone:"90xxxxxx14",interactions:[]},
+    {name:"Sono Traders Association",role:"Local business body",cat:"Organization",area:"Sono",phone:"97xxxxxx19",interactions:[]},
+    {name:"Ravi Prakash",role:"Local journalist, Dainik Bhaskar",cat:"Media",area:"Jamui Sadar",phone:"93xxxxxx60",interactions:[]},
+    {name:"Er. Vikram Singh",role:"Executive Engineer, PWD",cat:"Official",area:"Jamui Sadar",phone:"99xxxxxx44",interactions:[]},
+  ],
+  departments:[
+    {id:"DP-RD",name:"Rural Development Department",officer:{name:"Shri A.K. Mishra",designation:"District Rural Development Officer",phone:"94xxxxxx10"},status:"Response Pending",lastContact:"18 Sep",openCases:7,pendingCorrespondence:3},
+    {id:"DP-PWD",name:"Public Works Department (PWD)",officer:{name:"Er. Vikram Singh",designation:"Executive Engineer",phone:"99xxxxxx44"},status:"Active",lastContact:"24 Sep",openCases:4,pendingCorrespondence:1},
+    {id:"DP-EDU",name:"Education Department",officer:{name:"Smt. Kavita Rani",designation:"District Education Officer",phone:"92xxxxxx77"},status:"Active",lastContact:"20 Sep",openCases:2,pendingCorrespondence:0},
+    {id:"DP-POL",name:"Police / Administration",officer:{name:"Ajay Kumar",designation:"Superintendent of Police",phone:"94xxxxxx55"},status:"Active",lastContact:"25 Sep",openCases:1,pendingCorrespondence:0},
+  ],
+  correspondence:[
+    {ref:"IP/JAM/2026/0048",date:"11 Sep",sender:"Office of Arun Bharti, MP",recipient:"District Rural Development Officer",department:"DP-RD",subject:"Road infrastructure complaint — Jhajha",relatedCase:"CS-2201",relatedPerson:"Manoj Yadav",relatedVisit:null,status:"Awaiting Response",assignedStaff:"Case Manager",due:"28 Sep"},
+    {ref:"IP/JAM/2026/0051",date:"20 Sep",sender:"Office of Arun Bharti, MP",recipient:"PWD Executive Engineer",department:"DP-PWD",subject:"Jhajha road inspection follow-up",relatedCase:"CS-2201",relatedPerson:null,relatedVisit:"VS-14",status:"Dispatched",assignedStaff:"Protocol Coordinator",due:"—"},
+    {ref:"IP/JAM/2026/0053",date:"24 Sep",sender:"Block Development Office, Jhajha",recipient:"Office of Arun Bharti, MP",department:"DP-RD",subject:"Invitation — Jhajha community event, 28 Sep",relatedCase:null,relatedPerson:null,relatedVisit:"VS-14",status:"Incoming",assignedStaff:"PA",due:"—"},
+    {ref:"IP/JAM/2026/0054",date:"25 Sep",sender:"Office of Arun Bharti, MP",recipient:"District Education Officer",department:"DP-EDU",subject:"Scholarship eligibility clarification",relatedCase:null,relatedPerson:"Anita Kumari",relatedVisit:null,status:"Draft",assignedStaff:"PA",due:"30 Sep"},
+  ],
+  approvals:[
+    {id:"AC-1",title:"Draft letter — Jhajha road complaint",subtype:"Draft Letter",preparedBy:"AI Assistant",reviewedBy:"Case Manager",stage:"Staff Review",relatedRef:"IP/JAM/2026/0048",relatedCase:"CS-2201",relatedVisit:null,
+      content:"To the District Rural Development Officer,\n\nThe office of Hon. Arun Bharti, MP, Jamui, forwards a constituent complaint (Case CS-2201) regarding the deteriorated road connecting Jhajha to the nearest market. The matter has been pending since 9 September. We request an inspection and status update at the earliest.\n\nRegards,\nOffice of the Member of Parliament, Jamui",
+      history:[{time:"10:05",text:"AI prepared draft"},{time:"10:41",text:"Case Manager began review"}]},
+    {id:"AC-2",title:"Protocol communication — Jhajha visit",subtype:"Protocol Communication",preparedBy:"Protocol Coordinator",reviewedBy:"—",stage:"Staff Review",relatedRef:null,relatedCase:null,relatedVisit:"VS-14",
+      content:"The office of Hon. Arun Bharti, MP, Jamui, wishes to inform the district administration and Jhajha police station of a scheduled constituency visit today, arriving 11:30 AM. Local coordination is requested for the community meeting and infrastructure review segments.",
+      history:[{time:"09:15",text:"Protocol Coordinator prepared draft"}]},
+    {id:"AC-3",title:"Citizen response — Case CS-2179",subtype:"Citizen Response",preparedBy:"AI Assistant",reviewedBy:"—",stage:"AI Prepared",relatedRef:null,relatedCase:"CS-2179",relatedVisit:null,
+      content:"Dear Bharat Mahto,\n\nThank you for your patience regarding your pension case. The office has followed up with the relevant department and expects a status update by 27 September. We will contact you as soon as a response is received.\n\nOffice of the Member of Parliament, Jamui",
+      history:[{time:"08:50",text:"AI prepared draft response"}]},
+  ],
+  volunteers:{total:1248,active:932,inactive:316,byArea:{Jhajha:312,"Jamui Sadar":410,Chakai:241,Other:285}},
+  documents:[
+    {id:"DC-901",name:"Jhajha_Event_Invitation.pdf",received:"Today, 08:12 AM",status:"Unread",
+      from:"Block Development Office, Jhajha",
+      extraction:{event:"Jhajha Constituency Visit",date:"28 September",time:"11:30 AM",location:"Jhajha",
+        purpose:"Community interaction",
+        actions:["Add calendar event","Create visit","Check protocol requirements","Notify constituency coordinator","Prepare official response"]}},
+  ],
+  inbox:[
+    {id:"IB-1",source:"Phone call",sender:"Manoj Yadav",subject:"Road in extremely poor condition near Jhajha market",category:"Citizen Grievance",priority:"High",receivedAt:"08:40 AM",aiStatus:"NEW",assignedStaff:null,relatedPerson:"Manoj Yadav",relatedCase:null,requiredAction:"Create Case",deadline:"3 days",
+      aiAnalysis:{category:"Citizen Grievance",priority:"High",area:"Jhajha",department:"Rural Development",suggestedOwner:"Constituency Coordinator",suggestedAction:"Create Case",followUp:"Yes",deadline:"3 days"}},
+    {id:"IB-2",source:"Public portal",sender:"Ram Kumar Sah",subject:"Request for meeting — irrigation issue",category:"Appointment Request",priority:"Medium",receivedAt:"09:05 AM",aiStatus:"AI ANALYZED",assignedStaff:null,relatedPerson:null,relatedCase:null,requiredAction:"Assign",deadline:"2 days",
+      aiAnalysis:{category:"Appointment Request",priority:"Medium",area:"Sono",department:"—",suggestedOwner:"PA",suggestedAction:"Schedule meeting",followUp:"Yes",deadline:"2 days"}},
+    {id:"IB-3",source:"WhatsApp",sender:"Puja Bharti (Coordinator)",subject:"Photos from Chakai school site",category:"WhatsApp Message",priority:"Low",receivedAt:"07:55 AM",aiStatus:"COMPLETED",assignedStaff:"Constituency Coordinator",relatedPerson:null,relatedCase:null,requiredAction:"—",deadline:"—",
+      aiAnalysis:{category:"WhatsApp Message",priority:"Low",area:"Chakai",department:"—",suggestedOwner:"Constituency Coordinator",suggestedAction:"Information only",followUp:"No",deadline:"—"}},
+    {id:"IB-4",source:"Email",sender:"Block Development Office, Jhajha",subject:"Invitation — Jhajha community event, 28 Sep",category:"Official Letter",priority:"Medium",receivedAt:"08:12 AM",aiStatus:"ASSIGNED",assignedStaff:"PA",relatedPerson:null,relatedCase:null,relatedVisit:"VS-14",requiredAction:"Add to Calendar",deadline:"—",
+      aiAnalysis:{category:"Official Letter",priority:"Medium",area:"Jhajha",department:"Rural Development",suggestedOwner:"PA",suggestedAction:"Add to Calendar",followUp:"Yes",deadline:"—"}},
+    {id:"IB-5",source:"Email",sender:"PWD Executive Engineer",subject:"Response — Jhajha road inspection",category:"Department Communication",priority:"High",receivedAt:"10:02 AM",aiStatus:"ACTION REQUIRED",assignedStaff:"Case Manager",relatedPerson:null,relatedCase:"CS-2201",requiredAction:"Draft Response",deadline:"Today",
+      aiAnalysis:{category:"Department Communication",priority:"High",area:"Jhajha",department:"PWD",suggestedOwner:"Case Manager",suggestedAction:"Draft Response",followUp:"Yes",deadline:"Today"}},
+    {id:"IB-6",source:"Phone call",sender:"Bharat Mahto",subject:"Pension case status enquiry",category:"Follow-up Request",priority:"High",receivedAt:"09:40 AM",aiStatus:"WAITING",assignedStaff:"Case Manager",relatedPerson:null,relatedCase:"CS-2179",requiredAction:"Draft Response",deadline:"1 day",
+      aiAnalysis:{category:"Follow-up Request",priority:"High",area:"Sono",department:"Rural Development",suggestedOwner:"Case Manager",suggestedAction:"Draft Response",followUp:"Yes",deadline:"1 day"}},
+  ],
+  importantDates:[
+    {name:"Dr. R.K. Sinha",occasion:"Birthday",cat:"Official"},
+    {name:"Kiran Devi",occasion:"Birthday",cat:"Citizen"},
+    {name:"Sono Traders Association",occasion:"Founding anniversary",cat:"Organization"},
+    {name:"Jhajha Annual Mela",occasion:"Community event",cat:"Event"},
+  ],
+  tasks:[
+    {id:"TK-501",title:"Send infrastructure document to PWD department",owner:"Office Coordinator",due:"Tomorrow",priority:"High",source:"District Administration Meeting",status:"open",bucket:"today"},
+    {id:"TK-498",title:"Confirm Jhajha visit route with local police",owner:"Protocol Coordinator",due:"Today",priority:"High",source:"Visit VS-14",status:"open",bucket:"today"},
+    {id:"TK-495",title:"Draft reply to scholarship query — Anita Kumari",owner:"PA",due:"Today",priority:"Medium",source:"Appointment AP-106",status:"open",bucket:"today"},
+    {id:"TK-480",title:"Follow up on pension case CS-2179",owner:"Case Manager",due:"22 Sep",priority:"High",source:"Case CS-2179",status:"open",bucket:"overdue"},
+    {id:"TK-477",title:"Verify land dispute documents — CS-2140",owner:"Case Manager",due:"20 Sep",priority:"High",source:"Case CS-2140",status:"open",bucket:"overdue"},
+    {id:"TK-470",title:"Prepare Chakai school inauguration briefing",owner:"PA",due:"27 Sep",priority:"Medium",source:"Visit VS-15",status:"open",bucket:"upcoming"},
+    {id:"TK-460",title:"Update volunteer list for Barhat block",owner:"Constituency Coordinator",due:"01 Oct",priority:"Low",source:"Volunteers",status:"open",bucket:"upcoming"},
+  ],
+  notifications:[
+    {text:"New appointment request from Sono Traders Association",time:"9 min ago"},
+    {text:"Document received — Jhajha_Event_Invitation.pdf",time:"41 min ago"},
+    {text:"Protocol pending approval — Jhajha visit draft",time:"1 hr ago"},
+    {text:"Case CS-2140 has crossed 20 days without resolution",time:"2 hr ago"},
+    {text:"2 important dates today",time:"6 hr ago"},
+  ],
+  auditLog:[
+    {time:"08:12",text:"System received document — Jhajha_Event_Invitation.pdf"},
+    {time:"09:02",text:"PA created appointment AP-104 (Online — NITI Aayog)"},
+    {time:"09:15",text:"Protocol Coordinator advanced Jhajha visit to 'Local coordinator assigned'"},
+  ],
+  communications:[
+    {name:"Appointment confirmation",body:"Your meeting request with the MP's office has been confirmed for {date} at {time}.",approval:false},
+    {name:"Appointment reminder",body:"Reminder: your scheduled meeting is tomorrow at {time}.",approval:false},
+    {name:"Staff notification",body:"New appointment assigned to you: {name}, {time}.",approval:false},
+    {name:"Volunteer notification",body:"Your assigned constituency activity for {area} has been updated.",approval:false},
+    {name:"Important date greeting",body:"Best wishes on your {occasion} from the MP's office.",approval:true},
+    {name:"Visit coordination",body:"Hon. MP is scheduled to visit {place} on {date}. Please coordinate accordingly.",approval:true},
+  ],
+};}
+
+let DB = seedDB();
+const INITIAL_DB = JSON.parse(JSON.stringify(DB));
+
+/* =========================================================
+   NAV CONFIG
+========================================================= */
+const NAV = [
+  {id:"command", label:"Command Center"},
+  {id:"inbox", label:"Office Inbox", badge:()=>DB.inbox.filter(i=>i.aiStatus!=="COMPLETED").length},
+  {id:"appointments", label:"Appointments", badge:()=>DB.appointments.length},
+  {id:"calendar", label:"Calendar"},
+  {id:"constituency", label:"Constituency"},
+  {id:"cases", label:"Cases", badge:()=>DB.cases.filter(c=>c.status!=="Resolved").length},
+  {id:"visits", label:"Visits"},
+  {id:"protocol", label:"Protocol"},
+  {id:"approvals", label:"Approval Center", badge:()=>DB.approvals.filter(a=>!["Dispatched","Rejected"].includes(a.stage)).length},
+  {id:"people", label:"People"},
+  {id:"volunteers", label:"Volunteers"},
+  {id:"documents", label:"Documents"},
+  {id:"communications", label:"Communications"},
+  {id:"dates", label:"Important Dates", badge:()=>DB.importantDates.length},
+  {id:"tasks", label:"Tasks", badge:()=>DB.tasks.filter(t=>t.status==="open").length},
+  {id:"reports", label:"Reports"},
+  {id:"assistant", label:"AI Assistant"},
+  {id:"settings", label:"Settings"},
+];
+let route = "command";
+
+/* =========================================================
+   HELPERS
+========================================================= */
+function esc(s){return String(s==null?'—':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function toast(msg){
+  const w=document.getElementById('toast-wrap');
+  const t=document.createElement('div');
+  t.className='toast'; t.textContent=msg;
+  w.appendChild(t);
+  setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity .3s';setTimeout(()=>t.remove(),300);},3200);
+}
+function log(text){
+  const t=new Date(); const hh=String(t.getHours()).padStart(2,'0'), mm=String(t.getMinutes()).padStart(2,'0');
+  DB.auditLog.unshift({time:`${hh}:${mm}`,text});
+}
+function priorityTag(p){ const map={High:'tag-red',Medium:'tag-gold',Low:'tag-gray'}; return `<span class="tag ${map[p]||'tag-gray'}">${p}</span>`; }
+function statusTag(s){
+  const map={
+    Confirmed:'tag-teal',Pending:'tag-gold',New:'tag-blue',Assigned:'tag-gold',
+    "In Progress":'tag-blue',"Follow-up":'tag-red',Resolved:'tag-teal',Closed:'tag-gray',
+    Planning:'tag-gold',Requested:'tag-blue',Unread:'tag-gold',Read:'tag-gray',
+    Incoming:'tag-blue',Draft:'tag-gray',"Pending Approval":'tag-gold',Dispatched:'tag-teal',
+    "Awaiting Response":'tag-gold',Overdue:'tag-red',Rejected:'tag-red',Approved:'tag-teal',
+    NEW:'tag-blue',"AI ANALYZED":'tag-blue',ASSIGNED:'tag-gold',"ACTION REQUIRED":'tag-red',WAITING:'tag-gold',COMPLETED:'tag-teal',
+    "AI Prepared":'tag-blue',"Staff Review":'tag-gold',"Authorized Approval":'tag-gold',
+  };
+  return `<span class="tag ${map[s]||'tag-gray'}">${s}</span>`;
+}
+function aiChip(label,variant){ return `<span class="ai-chip ${variant||''}">${label}</span>`; }
+function canApprove(){ return ROLES.find(r=>r.id===currentRole).approve; }
+function findDept(id){ return DB.departments.find(d=>d.id===id); }
+function findCase(id){ return DB.cases.find(c=>c.id===id); }
+function findPerson(name){ return DB.people.find(p=>p.name===name); }
+function findVisit(id){ return DB.visits.find(v=>v.id===id); }
+function caseAge(days,status){ return (days>15 && status!=='Resolved'); }
+
+/* generic "AI is working" placeholder swap: replaces el content, waits, then runs cb */
+function aiWork(btn, label, cb){
+  const original = btn.outerHTML;
+  const holder = document.createElement('span');
+  holder.className='ai-loading'; holder.innerHTML = `<span class="spin"></span> ${label||'AI is analyzing…'}`;
+  btn.replaceWith(holder);
+  setTimeout(()=>{ cb(); }, 550);
+}
+
+/* =========================================================
+   RENDER: SIDEBAR / TOPBAR
+========================================================= */
+function renderSidebar(){
+  const nav=document.getElementById('nav-scroll');
+  nav.innerHTML = NAV.map(n=>{
+    const badge = n.badge ? n.badge() : null;
+    const urgent = (n.id==='approvals'||n.id==='inbox') && badge;
+    return `<div class="nav-item ${route===n.id?'active':''}" data-nav="${n.id}">
+      <span class="nav-dot"></span><span>${n.label}</span>
+      ${badge?`<span class="nav-badge ${urgent?'urgent':''}">${badge}</span>`:''}
+    </div>`;
+  }).join('');
+
+  const sel=document.getElementById('role-select');
+  if(!sel.dataset.init){
+    sel.innerHTML = ROLES.map(r=>`<option value="${r.id}">${r.label}</option>`).join('');
+    sel.value = currentRole;
+    sel.dataset.init="1";
+    sel.addEventListener('change',()=>{ currentRole=sel.value; renderAll(); toast(`Now viewing as ${ROLES.find(r=>r.id===currentRole).label}`); });
+  }
+}
+function renderTopbar(){
+  const n = NAV.find(x=>x.id===route);
+  document.getElementById('tb-title').textContent = n.label;
+  document.getElementById('tb-sub').textContent = `${OFFICE.officeName} · ${OFFICE.constituency}, ${OFFICE.state}`;
+  document.getElementById('notif-dot').style.display = DB.notifications.length? 'block':'none';
+}
+
+/* =========================================================
+   PAGE: COMMAND CENTER
+========================================================= */
+function pageCommand(){
+  const conf = DB.appointments.filter(a=>a.status==="Confirmed").length;
+  const pend = DB.appointments.filter(a=>a.status==="Pending").length;
+  const byType = t => DB.appointments.filter(a=>a.type===t).length;
+  const overdueTasks = DB.tasks.filter(t=>t.bucket==="overdue"&&t.status==="open").length;
+  const pendingProtocol = DB.protocol["VS-14"] ? DB.protocol["VS-14"].length - DB.protocolProgress["VS-14"] : 0;
+  const openCases = DB.cases.filter(c=>c.status!=='Resolved').length;
+  const highCases = DB.cases.filter(c=>c.priority==='High'&&c.status!=='Resolved').length;
+  const awaitingResp = DB.correspondence.filter(c=>c.status==='Awaiting Response').length;
+  const pendingApprovals = DB.approvals.filter(a=>!['Dispatched','Rejected'].includes(a.stage)).length;
+
+  const attention = [
+    ...DB.approvals.filter(a=>!['Dispatched','Rejected'].includes(a.stage)).map(a=>({dot:'gold',title:`Approval required — ${a.title}`,sub:a.stage,nav:'approvals'})),
+    ...DB.tasks.filter(t=>t.bucket==='overdue'&&t.status==='open').map(t=>({dot:'red',title:`Follow-up overdue — ${t.title}`,sub:`Owner: ${t.owner}`,nav:'tasks'})),
+    {dot:'blue',title:'Meeting preparation — District official',sub:`${DB.appointments[0].name}, ${DB.appointments[0].time}`,nav:'appointments'},
+    ...DB.documents.filter(d=>d.status==='Unread').map(d=>({dot:'gold',title:'Document requires review',sub:d.name,nav:'documents'})),
+    ...DB.inbox.filter(i=>i.aiStatus==='NEW'||i.aiStatus==='ACTION REQUIRED').map(i=>({dot:'red',title:`Inbox: ${i.subject}`,sub:`${i.category} · ${i.aiStatus}`,nav:'inbox'})),
+  ].slice(0,6);
+
+  return `
+  <div class="hero-card">
+    <div class="hero-eyebrow">${new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long'})}</div>
+    <div class="hero-greeting">Good morning, Shri Arun Bharti</div>
+    <div class="hero-stats">
+      <div class="hero-stat"><b>${DB.appointments.length}</b><span>Meetings today</span></div>
+      <div class="hero-stat"><b>${DB.visits.length}</b><span>Visits</span></div>
+      <div class="hero-stat"><b>${pendingApprovals}</b><span>Pending approvals</span></div>
+      <div class="hero-stat"><b>${highCases}</b><span>Priority cases</span></div>
+      <div class="hero-stat"><b>${overdueTasks}</b><span>Overdue follow-ups</span></div>
+    </div>
+    <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-primary" data-action="prepare-day">Prepare my day</button>
+      <button class="btn" data-nav="inbox">Office inbox</button>
+      <button class="btn" data-nav="approvals">Review priority items</button>
+      <button class="btn" data-nav="protocol">Create protocol</button>
+    </div>
+    <div class="briefing-box" id="briefing-box">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;">${aiChip('AI SUMMARY','summary')}<span style="font-weight:600;font-size:13px;">Today's office brief</span></div>
+      <div class="ai-text">You have ${highCases} high-priority matters requiring attention today. ${awaitingResp} are awaiting department responses and ${pendingApprovals} require approval before dispatch.</div>
+      <ul>
+        <li>${DB.appointments.length} meetings, first at ${DB.appointments[0].time}</li>
+        <li>Constituency visit to Jhajha at 1:00 PM</li>
+        <li>${pendingProtocol} protocol action${pendingProtocol===1?'':'s'} pending for the Jhajha visit</li>
+        <li>${DB.tasks.filter(t=>t.status==='open').length} follow-ups pending across the office</li>
+        <li>${DB.importantDates.filter(d=>d.occasion==='Birthday').length} important birthdays today</li>
+        <li>${highCases} high-priority constituency cases open</li>
+        <li>${DB.inbox.filter(i=>i.aiStatus==='NEW').length} new inbox item(s) not yet triaged</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="grid grid-5" style="margin-bottom:16px;">
+    <div class="card stat-card compact"><div class="stat-label">Open cases</div><div class="stat-value">${openCases}</div></div>
+    <div class="card stat-card compact"><div class="stat-label">High priority</div><div class="stat-value">${highCases}</div></div>
+    <div class="card stat-card compact"><div class="stat-label">Overdue tasks</div><div class="stat-value">${overdueTasks}</div><div class="stat-foot ${overdueTasks?'bad':''}"></div></div>
+    <div class="card stat-card compact"><div class="stat-label">Awaiting response</div><div class="stat-value">${awaitingResp}</div></div>
+    <div class="card stat-card compact"><div class="stat-label">Pending approval</div><div class="stat-value">${pendingApprovals}</div></div>
+  </div>
+
+  <div class="grid grid-3">
+    <div class="card">
+      <div class="section-title">Appointment capacity<span class="link" data-nav="appointments">View all</span></div>
+      ${Object.entries(DB.capacity).map(([k,v])=>{
+        const pct=Math.round(v.used/v.max*100);
+        const cls = pct>=100?'full':pct>=75?'warn':'';
+        return `<div style="margin-bottom:10px;">
+          <div style="display:flex;justify-content:space-between;font-size:11.5px;"><span>${k}</span><span style="font-family:var(--mono);color:var(--text-dim);">${v.used} / ${v.max}</span></div>
+          <div class="progress-track"><div class="progress-fill ${cls}" style="width:${pct}%;"></div></div>
+        </div>`;
+      }).join('')}
+    </div>
+
+    <div class="card">
+      <div class="section-title">Today's schedule<span class="link" data-nav="calendar">Calendar</span></div>
+      ${DB.appointments.map(a=>`
+        <div class="list-row row-hover" data-action="view-appt" data-id="${a.id}">
+          <div class="row-time">${a.time}</div>
+          <div class="row-main"><div class="row-title">${esc(a.name)}</div><div class="row-sub">${a.type}</div></div>
+          ${statusTag(a.status)}
+        </div>`).join('')}
+    </div>
+
+    <div class="card">
+      <div class="section-title">What needs attention<span class="link" data-nav="approvals">Approval Center</span></div>
+      ${attention.map(a=>`
+        <div class="attn-item" data-nav="${a.nav}">
+          <div class="attn-dot ${a.dot}"></div>
+          <div class="row-main"><div class="row-title">${esc(a.title)}</div><div class="row-sub">${esc(a.sub)}</div></div>
+        </div>`).join('')}
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:14px;">
+    <div class="section-title">Recent activity<span class="link" data-action="settings-tab" data-val="audit" data-nav="settings">Full audit log</span></div>
+    ${DB.auditLog.slice(0,5).map(a=>`<div class="list-row"><div class="row-time">${a.time}</div><div class="row-main row-title">${esc(a.text)}</div></div>`).join('')}
+  </div>
+  `;
+}
+
+/* =========================================================
+   PAGE: OFFICE INBOX
+========================================================= */
+let inboxOpenId = null;
+function pageInbox(){
+  return `
+  <div class="page-head"><div><div class="page-title">Office Inbox</div><div class="page-desc">Everything arriving at the office — calls, WhatsApp, email, letters and requests — in one place</div></div></div>
+  <div class="grid grid-2" style="grid-template-columns:1fr 1.3fr;">
+    <div class="card">
+      <div class="section-title">Incoming</div>
+      ${DB.inbox.map(i=>`
+        <div class="list-row row-hover" data-action="open-inbox" data-id="${i.id}" style="${inboxOpenId===i.id?'background:var(--panel-hover);border-radius:4px;':''}">
+          <div class="row-main">
+            <div class="row-title">${esc(i.subject)}</div>
+            <div class="row-sub">${i.source} · ${esc(i.sender)} · ${i.receivedAt}</div>
+          </div>
+          ${priorityTag(i.priority)}
+          ${statusTag(i.aiStatus)}
+        </div>`).join('')}
+    </div>
+    <div class="card" id="inbox-detail">
+      ${inboxOpenId ? inboxDetailHTML(DB.inbox.find(i=>i.id===inboxOpenId)) : `<div class="empty"><div class="empty-title">Select an inbox item</div>Choose an item to see the AI analysis and available actions.</div>`}
+    </div>
+  </div>
+  `;
+}
+function inboxDetailHTML(item){
+  const a = item.aiAnalysis;
+  return `
+    <div class="section-title">${esc(item.subject)}${statusTag(item.aiStatus)}</div>
+    <div style="font-size:11.5px;color:var(--text-faint);margin-bottom:12px;">${item.source} · From ${esc(item.sender)} · ${item.receivedAt}</div>
+    <div class="ai-box">
+      <div style="display:flex;justify-content:space-between;align-items:center;">${aiChip('AI ANALYSIS')}${item.relatedCase?`<span class="link-mini" data-action="view-case" data-id="${item.relatedCase}">View related case ${item.relatedCase}</span>`:''}</div>
+      <div class="ai-text">Category: ${a.category}
+Priority: ${a.priority}
+Related area: ${a.area}
+Department: ${a.department}
+Suggested owner: ${a.suggestedOwner}
+Suggested action: ${a.suggestedAction}
+Follow-up required: ${a.followUp}
+Deadline: ${a.deadline}</div>
+    </div>
+    <div class="section-title" style="margin-bottom:8px;">Actions</div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;">
+      <button class="btn btn-sm btn-primary" data-action="inbox-create-case" data-id="${item.id}" ${item.relatedCase?'disabled':''}>${item.relatedCase?'Case created':'Create Case'}</button>
+      <button class="btn btn-sm" data-action="inbox-create-task" data-id="${item.id}">Create Task</button>
+      <button class="btn btn-sm" data-action="inbox-assign" data-id="${item.id}">Assign</button>
+      <button class="btn btn-sm" data-action="inbox-draft" data-id="${item.id}">Draft Response</button>
+      <button class="btn btn-sm" data-action="inbox-calendar" data-id="${item.id}">Add to Calendar</button>
+      <button class="btn btn-sm" data-action="inbox-complete" data-id="${item.id}">Mark Complete</button>
+    </div>
+    ${item.assignedStaff?`<div class="role-note" style="margin-top:10px;">Assigned to ${item.assignedStaff}</div>`:''}
+  `;
+}
+
+/* =========================================================
+   PAGE: APPOINTMENTS
+========================================================= */
+function pageAppointments(){
+  return `
+  <div class="page-head">
+    <div><div class="page-title">Appointments</div><div class="page-desc">Structured requests replacing phone bookings — ${DB.appointments.length} today</div></div>
+    <button class="btn btn-primary" data-action="open-new-appt">New appointment</button>
+  </div>
+  <div class="grid grid-4" style="margin-bottom:16px;">
+    ${Object.entries(DB.capacity).map(([k,v])=>{
+      const pct=Math.round(v.used/v.max*100); const cls = pct>=100?'full':pct>=75?'warn':'';
+      return `<div class="card stat-card"><div class="stat-label">${k} meetings</div><div class="stat-value">${v.used} <span style="font-size:14px;color:var(--text-faint);">/ ${v.max}</span></div>
+      <div class="progress-track"><div class="progress-fill ${cls}" style="width:${pct}%;"></div></div></div>`;
+    }).join('')}
+  </div>
+  <div class="card">
+    <table>
+      <thead><tr><th>Time</th><th>Name</th><th>Type</th><th>Purpose</th><th>Priority</th><th>Status</th></tr></thead>
+      <tbody>
+      ${DB.appointments.map(a=>`
+        <tr class="row-hover" data-action="view-appt" data-id="${a.id}">
+          <td style="font-family:var(--mono);">${a.time}</td>
+          <td><div style="font-weight:500;">${esc(a.name)}</div><div style="color:var(--text-faint);font-size:11px;">${esc(a.org)}</div></td>
+          <td><span class="tag tag-gray">${a.type}</span></td>
+          <td style="color:var(--text-dim);max-width:260px;">${esc(a.purpose)}</td>
+          <td>${priorityTag(a.priority)}</td>
+          <td>${a.completed?'<span class="tag tag-teal">Completed</span>':statusTag(a.status)}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>
+  </div>
+  `;
+}
+
+function modalNewAppointment(){
+  return `
+  <div class="modal-head"><h3>New appointment</h3><button class="modal-close" data-action="close-modal">✕</button></div>
+  <div class="modal-body">
+    <div class="field-row">
+      <div class="field"><label>Name</label><input id="f-name" placeholder="Visitor name"></div>
+      <div class="field"><label>Phone</label><input id="f-phone" placeholder="10-digit mobile"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Organization</label><input id="f-org" placeholder="Organization / village"></div>
+      <div class="field"><label>Meeting type</label>
+        <select id="f-type"><option>Direct</option><option>Online</option><option>Official</option><option>Constituency</option><option>Delegation</option></select>
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Requested time</label><input id="f-time" placeholder="e.g. 03:30 PM"></div>
+      <div class="field"><label>Priority</label><select id="f-priority"><option>Medium</option><option>High</option><option>Low</option></select></div>
+    </div>
+    <div class="field"><label>Purpose</label><textarea id="f-purpose" rows="2" placeholder="Reason for the meeting"></textarea></div>
+  </div>
+  <div class="modal-foot">
+    <button class="btn" data-action="close-modal">Cancel</button>
+    <button class="btn btn-primary" data-action="submit-appt">Create appointment</button>
+  </div>
+  `;
+}
+
+function modalViewAppointment(id){
+  const a = DB.appointments.find(x=>x.id===id);
+  const person = findPerson(a.name);
+  return `
+  <div class="modal-head"><div><h3>${esc(a.name)}</h3><div class="mh-sub">${a.type} · ${a.time}</div></div><button class="modal-close" data-action="close-modal">✕</button></div>
+  <div class="modal-body">
+    <div class="kv"><span class="k">Organization</span><span class="v">${esc(a.org)}</span></div>
+    <div class="kv"><span class="k">Phone</span><span class="v">${esc(a.phone)}</span></div>
+    <div class="kv"><span class="k">Priority</span><span class="v">${priorityTag(a.priority)}</span></div>
+    <div class="kv"><span class="k">Status</span><span class="v">${a.completed?'<span class="tag tag-teal">Completed</span>':statusTag(a.status)}</span></div>
+    <div class="divider"></div>
+    <div style="font-size:11.5px;color:var(--text-faint);margin-bottom:5px;">Purpose</div>
+    <div style="font-size:12.5px;margin-bottom:12px;">${esc(a.purpose)}</div>
+    ${person && person.interactions.length ? `<div style="font-size:11.5px;color:var(--text-faint);margin-bottom:6px;">Previous interactions</div><div class="tl">${person.interactions.map(h=>`<div class="tl-item"><div class="tl-date">${h.date}</div><div class="tl-text">${esc(h.text)}</div></div>`).join('')}</div>`:''}
+    <div id="meeting-brief-slot"></div>
+  </div>
+  <div class="modal-foot">
+    ${a.status==='Pending' ? `<button class="btn" data-action="reject-appt" data-id="${a.id}">Decline</button><button class="btn btn-primary" data-action="confirm-appt" data-id="${a.id}">Confirm</button>` : ''}
+    ${a.status==='Confirmed' && !a.completed ? `<button class="btn" data-action="prep-brief" data-id="${a.id}">Prepare meeting brief</button><button class="btn btn-gold" data-action="mark-completed" data-id="${a.id}">Mark meeting completed</button>` : ''}
+    <button class="btn" data-action="close-modal">Close</button>
+  </div>
+  `;
+}
+
+function modalMeetingNotes(id){
+  const a = DB.appointments.find(x=>x.id===id);
+  return `
+  <div class="modal-head"><div><h3>Meeting notes</h3><div class="mh-sub">${esc(a.name)} · ${a.time}</div></div><button class="modal-close" data-action="close-modal">✕</button></div>
+  <div class="modal-body">
+    <div class="field"><label>Discussion</label><textarea id="mn-discussion" rows="2" placeholder="What was discussed">${esc(a.purpose)}</textarea></div>
+    <div class="field"><label>Decisions</label><textarea id="mn-decisions" rows="2" placeholder="Decisions made"></textarea></div>
+    <div class="field"><label>Requests</label><textarea id="mn-requests" rows="2" placeholder="Requests raised"></textarea></div>
+    <div class="field"><label>Commitments</label><textarea id="mn-commitments" rows="2" placeholder="Commitments made by the office"></textarea></div>
+    <div id="ai-summary-slot"></div>
+  </div>
+  <div class="modal-foot">
+    <button class="btn" data-action="close-modal">Cancel</button>
+    <button class="btn btn-primary" data-action="gen-meeting-summary" data-id="${a.id}">Generate AI summary</button>
+  </div>
+  `;
+}
+
+/* =========================================================
+   PAGE: CALENDAR
+========================================================= */
+function pageCalendar(){
+  const days=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  const today = new Date();
+  const startOfWeek = new Date(today); startOfWeek.setDate(today.getDate()-today.getDay());
+  const evts = {
+    [today.getDate()]: [["09:30 Ramesh Pandey","official"],["10:15 Sunita Devi","constituency"],["13:00 Jhajha Visit","visit"],["16:00 Delegation","official"]]
+  };
+  let cells='';
+  for(let i=0;i<7;i++){
+    const d=new Date(startOfWeek); d.setDate(startOfWeek.getDate()+i);
+    const isToday = d.toDateString()===today.toDateString();
+    const dayEvts = isToday ? evts[today.getDate()]||[] : [];
+    cells += `<div class="cal-cell ${isToday?'today':''}">
+      <div class="cal-date">${d.getDate()}</div>
+      ${dayEvts.map(([t,c])=>`<div class="cal-evt ${c}">${t}</div>`).join('')}
+      ${!isToday && i===2 ? `<div class="cal-evt">10:00 Chakai prep call</div>`:''}
+    </div>`;
+  }
+  return `
+  <div class="page-head">
+    <div><div class="page-title">Calendar</div><div class="page-desc">Week of ${startOfWeek.toLocaleDateString('en-IN',{day:'numeric',month:'short'})}</div></div>
+    <div style="display:flex;gap:6px;"><span class="tag tag-gold">Official</span><span class="tag tag-teal">Constituency</span><span class="tag tag-red">Visit</span></div>
+  </div>
+  <div class="card">
+    <div class="cal-grid">${days.map(d=>`<div class="cal-daylabel">${d}</div>`).join('')}</div>
+    <div class="cal-grid" style="margin-top:4px;">${cells}</div>
+  </div>
+  <div class="card" style="margin-top:16px;">
+    <div class="section-title">Today, in order</div>
+    ${DB.appointments.map(a=>`<div class="list-row row-hover" data-action="view-appt" data-id="${a.id}"><div class="row-time">${a.time}</div><div class="row-main"><div class="row-title">${esc(a.name)}</div><div class="row-sub">${a.type} · ${esc(a.purpose)}</div></div>${statusTag(a.status)}</div>`).join('')}
+    <div class="list-row row-hover" data-action="view-visit" data-id="VS-14"><div class="row-time">01:00 PM</div><div class="row-main"><div class="row-title">Jhajha constituency visit</div><div class="row-sub">Arrival, community meeting, infrastructure review</div></div><span class="tag tag-red">Visit</span></div>
+  </div>
+  `;
+}
+
+/* =========================================================
+   PAGE: CONSTITUENCY
+========================================================= */
+function pageConstituency(){
+  const areas = ["Jhajha","Jamui Sadar","Chakai","Sono","Khaira","Barhat"];
+  return `
+  <div class="page-head"><div><div class="page-title">Constituency — Jamui</div><div class="page-desc">Blocks, volunteer coverage and case load by area</div></div></div>
+  <div class="grid grid-3" style="grid-template-columns:repeat(3,1fr);">
+    ${areas.map(a=>{
+      const vol = DB.volunteers.byArea[a] || Math.round(DB.volunteers.byArea.Other/4);
+      const cases = DB.cases.filter(c=>c.location===a);
+      const open = cases.filter(c=>c.status!=='Resolved').length;
+      return `<div class="card">
+        <div style="font-weight:600;font-size:13.5px;margin-bottom:8px;">${a}</div>
+        <div class="kv"><span class="k">Volunteers</span><span class="v">${vol}</span></div>
+        <div class="kv"><span class="k">Open cases</span><span class="v">${open}</span></div>
+        <div class="kv"><span class="k">Resolved cases</span><span class="v">${cases.length-open}</span></div>
+      </div>`;
+    }).join('')}
+  </div>
+  `;
+}
+
+/* =========================================================
+   PAGE: CASES  (+ Case 360)
+========================================================= */
+let caseFilter = "all";
+function pageCases(){
+  const filtered = caseFilter==="all" ? DB.cases : DB.cases.filter(c=>c.status===caseFilter);
+  return `
+  <div class="page-head">
+    <div><div class="page-title">Constituency cases</div><div class="page-desc">Grievance pipeline — New → Assigned → In Progress → Follow-up → Resolved → Closed</div></div>
+  </div>
+  <div class="tabbar">
+    ${["all","New","Assigned","In Progress","Follow-up","Resolved"].map(s=>`<div class="tab ${caseFilter===s?'active':''}" data-action="case-filter" data-val="${s}">${s==="all"?"All":s}</div>`).join('')}
+  </div>
+  <div class="card">
+    <table>
+      <thead><tr><th>Case</th><th>Citizen</th><th>Location</th><th>Category</th><th>Age</th><th>Priority</th><th>Status</th></tr></thead>
+      <tbody>
+      ${filtered.map(c=>`
+        <tr class="row-hover" data-action="view-case" data-id="${c.id}">
+          <td style="font-family:var(--mono);color:var(--text-dim);">${c.id}</td>
+          <td>${esc(c.citizen)}</td>
+          <td>${c.location}</td>
+          <td>${c.category}</td>
+          <td style="color:${caseAge(c.days,c.status)?'var(--red)':'var(--text-dim)'};">${c.days}d</td>
+          <td>${priorityTag(c.priority)}</td>
+          <td>${statusTag(c.status)}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>
+    ${filtered.length===0?'<div class="empty"><div class="empty-title">No cases here</div>Nothing matches this filter.</div>':''}
+  </div>
+  `;
+}
+
+let caseModalTab = "Overview";
+function modalCaseDetail(id){
+  const c = findCase(id);
+  const dept = findDept(CATEGORY_DEPT[c.category]);
+  const person = findPerson(c.citizen);
+  const corr = DB.correspondence.filter(x=>x.relatedCase===c.id);
+  const rel_tasks = DB.tasks.filter(t=> t.source && t.source.includes(c.id));
+  const tabs = ["Overview","Timeline","Documents","Communications","Tasks","People","Department","Notes"];
+  let body = '';
+  if(caseModalTab==='Overview'){
+    body = `
+      <div class="ai-box">
+        <div style="display:flex;justify-content:space-between;align-items:center;">${aiChip('AI SUMMARY','summary')}<span class="link-mini" data-action="case-summarize" data-id="${c.id}">Regenerate</span></div>
+        <div class="ai-text" id="case-summary-text">${caseSummaryText(c)}</div>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;">
+        <button class="btn btn-sm" data-action="case-followup" data-id="${c.id}">Generate Follow-up</button>
+        <button class="btn btn-sm" data-action="case-draft-letter" data-id="${c.id}">Draft Letter</button>
+        <button class="btn btn-sm" data-action="case-create-task" data-id="${c.id}">Create Task</button>
+      </div>
+      <div class="kv"><span class="k">Created</span><span class="v">${c.created}</span></div>
+      <div class="kv"><span class="k">Last updated</span><span class="v">${c.updated}</span></div>
+      <div class="kv"><span class="k">Next action</span><span class="v">${esc(c.nextAction)}</span></div>
+      <div class="kv"><span class="k">Deadline</span><span class="v">${c.deadline}</span></div>
+    `;
+  } else if(caseModalTab==='Timeline'){
+    body = `<div class="tl">${c.timeline.map(t=>`<div class="tl-item"><div class="tl-date">${t.date}</div><div class="tl-text">${esc(t.text)}</div></div>`).join('')}</div>`;
+  } else if(caseModalTab==='Documents'){
+    body = c.docs.length ? c.docs.map(d=>`<div class="list-row"><div class="row-main row-title">${esc(d)}</div></div>`).join('') : `<div class="empty"><div class="empty-title">No documents</div>Nothing has been attached to this case yet.</div>`;
+  } else if(caseModalTab==='Communications'){
+    body = corr.length ? corr.map(x=>`<div class="list-row"><div class="row-main"><div class="row-title">${x.ref} — ${esc(x.subject)}</div><div class="row-sub">To ${esc(x.recipient)} · Due ${x.due}</div></div>${statusTag(x.status)}</div>`).join('') + `<button class="btn btn-sm" style="margin-top:8px;" data-action="case-draft-letter" data-id="${c.id}">Draft Response</button>` : `<div class="empty"><div class="empty-title">No correspondence</div></div><button class="btn btn-sm" data-action="case-draft-letter" data-id="${c.id}">Draft Response</button>`;
+  } else if(caseModalTab==='Tasks'){
+    body = rel_tasks.length ? rel_tasks.map(t=>`<div class="list-row"><div class="row-main"><div class="row-title">${esc(t.title)}</div><div class="row-sub">${t.owner} · Due ${t.due}</div></div>${priorityTag(t.priority)}</div>`).join('') + `<button class="btn btn-sm" style="margin-top:8px;" data-action="case-create-task" data-id="${c.id}">Create Task</button>` : `<div class="empty"><div class="empty-title">No linked tasks</div></div><button class="btn btn-sm" data-action="case-create-task" data-id="${c.id}">Create Task</button>`;
+  } else if(caseModalTab==='People'){
+    body = `<div class="kv"><span class="k">Citizen</span><span class="v">${esc(c.citizen)}</span></div><div class="kv"><span class="k">Phone</span><span class="v">${person?esc(person.phone):'—'}</span></div>${person?`<button class="btn btn-sm" style="margin-top:8px;" data-action="view-person" data-name="${esc(person.name)}">Open Person 360</button>`:''}`;
+  } else if(caseModalTab==='Department'){
+    body = dept ? `<div class="kv"><span class="k">Department</span><span class="v">${dept.name}</span></div><div class="kv"><span class="k">Officer</span><span class="v">${dept.officer.name}</span></div><div class="kv"><span class="k">Designation</span><span class="v">${dept.officer.designation}</span></div><div class="kv"><span class="k">Status</span><span class="v">${statusTag(dept.status)}</span></div><div class="kv"><span class="k">Last contact</span><span class="v">${dept.lastContact}</span></div><button class="btn btn-sm" style="margin-top:8px;" data-action="view-dept" data-id="${dept.id}">Open department directory</button>` : `<div class="empty">No department mapped.</div>`;
+  } else if(caseModalTab==='Notes'){
+    body = (c.notes.length?c.notes.map(n=>`<div class="note-item">${esc(n)}</div>`).join(''):'<div class="empty" style="padding:12px 0;">No notes yet.</div>') +
+      `<div class="field" style="margin-top:8px;"><input id="new-case-note" placeholder="Add a note and press Add"></div><button class="btn btn-sm" data-action="case-add-note" data-id="${c.id}">Add note</button>`;
+  }
+  return `
+  <div class="modal-head">
+    <div><h3>${c.id} — ${esc(c.citizen)}</h3><div class="mh-sub">${c.category} · ${c.location} · ${priorityTag(c.priority)} ${statusTag(c.status)}</div></div>
+    <button class="modal-close" data-action="close-modal">✕</button>
+  </div>
+  <div class="mtabbar">${tabs.map(t=>`<div class="mtab ${caseModalTab===t?'active':''}" data-action="case-tab" data-val="${t}" data-id="${c.id}">${t}</div>`).join('')}</div>
+  <div class="modal-body">${body}</div>
+  <div class="modal-foot"><button class="btn" data-action="close-modal">Close</button></div>
+  `;
+}
+function caseSummaryText(c){
+  return `This case concerns a ${c.category.toLowerCase()} issue in ${c.location}. The matter was raised on ${c.created} and its current status is "${c.status}". ${c.status==='Resolved' ? 'The citizen has been updated and the case is closed.' : `The next recommended action is: ${c.nextAction.toLowerCase()}.`}`;
+}
+
+/* =========================================================
+   PAGE: VISITS  (+ Visit Command Center)
+========================================================= */
+function pageVisits(){
+  return `
+  <div class="page-head"><div><div class="page-title">Visit planning</div><div class="page-desc">Constituency visits, schedules and coordination</div></div></div>
+  <div class="grid grid-3" style="grid-template-columns:1fr 1fr 1fr;">
+  ${DB.visits.map(v=>`
+    <div class="card row-hover" data-action="view-visit" data-id="${v.id}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;">
+        <div style="font-weight:600;font-size:14px;">${v.place}</div>${statusTag(v.status)}
+      </div>
+      <div style="color:var(--text-faint);font-size:11.5px;margin-bottom:10px;">${v.date} · ${v.purpose}</div>
+      ${v.schedule.slice(0,3).map(([t,e])=>`<div class="list-row"><div class="row-time">${t}</div><div class="row-main row-title">${e}</div></div>`).join('')}
+    </div>
+  `).join('')}
+  </div>
+  `;
+}
+
+function modalVisitDetail(id){
+  const v = findVisit(id);
+  const areaCases = DB.cases.filter(c=>c.location===v.place && c.status!=='Resolved');
+  const corr = DB.correspondence.filter(c=>c.relatedVisit===v.id);
+  const people = DB.people.filter(p=>p.area===v.place);
+  return `
+  <div class="modal-head"><div><h3>Visit Command Center — ${v.place}</h3><div class="mh-sub">${v.date} · ${v.purpose} ${statusTag(v.status)}</div></div><button class="modal-close" data-action="close-modal">✕</button></div>
+  <div class="modal-body">
+    <div class="ai-box">
+      <div style="display:flex;justify-content:space-between;align-items:center;">${aiChip('AI SUMMARY','summary')}<span class="link-mini" data-action="visit-brief" data-id="${v.id}">Generate briefing</span></div>
+      <div class="ai-text" id="visit-brief-text">Click "Generate briefing" for an AI summary of related cases, correspondence and prior meetings for ${v.place}.</div>
+    </div>
+    <div class="section-title">Timeline</div>
+    ${v.schedule.map(([t,e])=>`<div class="list-row"><div class="row-time">${t}</div><div class="row-main row-title">${e}</div></div>`).join('')}
+    <div class="divider"></div>
+    <div class="section-title">Preparation tasks</div>
+    ${v.checklist.map((it,idx)=>`
+      <div class="checklist-item" style="cursor:pointer;" data-action="toggle-visit-check" data-id="${v.id}" data-idx="${idx}">
+        <div class="check-circle ${it.done?'done':''}">${it.done?'✓':''}</div>
+        <div class="check-label ${it.done?'done':''}">${it.label}</div>
+      </div>`).join('')}
+    <div class="divider"></div>
+    <div class="section-title">People</div>
+    ${people.length?people.map(p=>`<div class="list-row row-hover" data-action="view-person" data-name="${esc(p.name)}"><div class="row-main"><div class="row-title">${esc(p.name)}</div><div class="row-sub">${esc(p.role)}</div></div></div>`).join(''):'<div class="empty" style="padding:10px 0;">No contacts on file for this area yet.</div>'}
+    <div class="divider"></div>
+    <div class="section-title">Related cases (${areaCases.length})</div>
+    ${areaCases.length?areaCases.map(c=>`<div class="list-row row-hover" data-action="view-case" data-id="${c.id}"><div class="row-main"><div class="row-title">${c.id} — ${esc(c.citizen)}</div><div class="row-sub">${c.category}</div></div>${priorityTag(c.priority)}</div>`).join(''):'<div class="empty" style="padding:10px 0;">No open cases in this area.</div>'}
+    <div class="divider"></div>
+    <div class="section-title">Documents & correspondence</div>
+    ${corr.length?corr.map(x=>`<div class="list-row"><div class="row-main"><div class="row-title">${x.ref} — ${esc(x.subject)}</div></div>${statusTag(x.status)}</div>`).join(''):'<div class="empty" style="padding:10px 0;">None linked yet.</div>'}
+  </div>
+  <div class="modal-foot"><button class="btn" data-action="close-modal">Close</button></div>
+  `;
+}
+
+/* =========================================================
+   PAGE: PROTOCOL
+========================================================= */
+function pageProtocol(){
+  const steps = DB.protocol["VS-14"];
+  const done = DB.protocolProgress["VS-14"];
+  return `
+  <div class="page-head"><div><div class="page-title">Protocol coordination</div><div class="page-desc">Jhajha visit · District administration, police and local coordination</div></div></div>
+  <div class="grid grid-2" style="grid-template-columns:1.3fr 1fr;">
+    <div class="card">
+      <div class="section-title">Jhajha visit — protocol status</div>
+      ${steps.map((s,i)=>`
+        <div class="checklist-item">
+          <div class="check-circle ${i<done?'done':i===done?'current':''}">${i<done?'✓':''}</div>
+          <div class="check-label ${i<done?'done':i===done?'current':''}">${s}</div>
+        </div>
+      `).join('')}
+      <div style="margin-top:14px;display:flex;gap:8px;">
+        ${done<steps.length-2 ? `<button class="btn btn-primary" data-action="advance-protocol">Advance to next step</button>`:''}
+        ${done===steps.length-2 ? `<button class="btn btn-primary" data-action="advance-protocol">Generate AI draft</button>`:''}
+        ${done===steps.length-1 ? (canApprove() ? `<button class="btn btn-gold" data-action="advance-protocol">Approve & dispatch</button>` : `<button class="btn" disabled title="Requires MP or Administrator role">Awaiting authorized approval</button>`) : ''}
+        ${done>=steps.length ? `<span class="tag tag-teal">Dispatched</span>` : ''}
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-title">Coordination recipients</div>
+      <div class="list-row"><div class="row-main row-title">District administration</div><span class="tag tag-teal">Notified</span></div>
+      <div class="list-row"><div class="row-main row-title">Jhajha police station</div><span class="tag tag-teal">Notified</span></div>
+      <div class="list-row"><div class="row-main row-title">Local administrative authority</div><span class="tag tag-gold">Pending</span></div>
+      <div class="list-row"><div class="row-main row-title">Security / protocol team</div><span class="tag tag-gold">Pending</span></div>
+      <div class="divider"></div>
+      <div class="section-title" style="margin-bottom:6px;">Rule</div>
+      <div style="font-size:11.5px;color:var(--text-dim);">AI can draft and prepare protocol communication. Only an authorized user can approve and dispatch official correspondence.</div>
+      <button class="btn btn-sm" style="margin-top:10px;" data-nav="approvals">View in Approval Center</button>
+    </div>
+  </div>
+  `;
+}
+
+/* =========================================================
+   PAGE: APPROVAL CENTER
+========================================================= */
+function pageApprovals(){
+  return `
+  <div class="page-head"><div><div class="page-title">Approval Center</div><div class="page-desc">AI never sends official communication independently — every draft is reviewed and approved by an authorized user</div></div></div>
+  <div class="grid grid-3" style="grid-template-columns:repeat(auto-fit,minmax(280px,1fr));">
+  ${DB.approvals.map(a=>`
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:6px;">
+        <div style="font-weight:600;font-size:13px;">${esc(a.title)}</div>
+        ${statusTag(a.stage)}
+      </div>
+      <div style="font-size:11px;color:var(--text-faint);margin-bottom:8px;">${a.subtype}</div>
+      <div class="kv"><span class="k">Prepared by</span><span class="v">${esc(a.preparedBy)}</span></div>
+      <div class="kv"><span class="k">Reviewed by</span><span class="v">${esc(a.reviewedBy)}</span></div>
+      ${a.relatedCase?`<div class="kv"><span class="k">Related case</span><span class="v link-mini" data-action="view-case" data-id="${a.relatedCase}">${a.relatedCase}</span></div>`:''}
+      ${a.relatedVisit?`<div class="kv"><span class="k">Related visit</span><span class="v link-mini" data-action="view-visit" data-id="${a.relatedVisit}">${a.relatedVisit}</span></div>`:''}
+      <div class="divider"></div>
+      <div style="font-size:11.5px;color:var(--text-dim);max-height:70px;overflow:hidden;margin-bottom:10px;">${esc(a.content).slice(0,160)}…</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;">
+        <button class="btn btn-sm" data-action="approval-source" data-id="${a.id}">View source</button>
+        <button class="btn btn-sm" data-action="approval-audit" data-id="${a.id}">Audit trail</button>
+        ${a.stage==='AI Prepared'?`<button class="btn btn-sm btn-primary" data-action="approval-advance" data-id="${a.id}">Send for staff review</button>`:''}
+        ${a.stage==='Staff Review'?`<button class="btn btn-sm" data-action="approval-changes" data-id="${a.id}">Request changes</button><button class="btn btn-sm btn-primary" data-action="approval-advance" data-id="${a.id}">Send for approval</button>`:''}
+        ${a.stage==='Authorized Approval'? (canApprove() ? `<button class="btn btn-sm btn-red" data-action="approval-reject" data-id="${a.id}">Reject</button><button class="btn btn-sm btn-gold" data-action="approval-advance" data-id="${a.id}">Approve & dispatch</button>` : `<button class="btn btn-sm" disabled title="Requires MP or Administrator role">Awaiting authorized approval</button>`):''}
+      </div>
+    </div>
+  `).join('')}
+  </div>
+  `;
+}
+
+/* =========================================================
+   PAGE: PEOPLE  (+ Person 360)
+========================================================= */
+let peopleFilter="all";
+function pagePeople(){
+  const cats=[...new Set(DB.people.map(p=>p.cat))];
+  if(peopleFilter==="Department"){
+    return `
+    <div class="page-head"><div><div class="page-title">People</div><div class="page-desc">Citizens, officials, volunteers, organizations, media and departments</div></div></div>
+    <div class="tabbar">${["all",...cats,"Department"].map(c=>`<div class="tab ${peopleFilter===c?'active':''}" data-action="people-filter" data-val="${c}">${c==="all"?"All":c}</div>`).join('')}</div>
+    <div class="grid grid-3">
+    ${DB.departments.map(d=>`
+      <div class="card row-hover" data-action="view-dept" data-id="${d.id}">
+        <div style="font-weight:600;font-size:12.5px;">${d.name}</div>
+        <div style="color:var(--text-faint);font-size:11px;margin-top:2px;">${d.officer.designation}: ${d.officer.name}</div>
+        <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;">${statusTag(d.status)}<span class="tag tag-gray">${d.openCases} open cases</span></div>
+      </div>
+    `).join('')}
+    </div>`;
+  }
+  const filtered = peopleFilter==="all" ? DB.people : DB.people.filter(p=>p.cat===peopleFilter);
+  return `
+  <div class="page-head"><div><div class="page-title">People</div><div class="page-desc">Citizens, officials, volunteers, organizations, media and departments</div></div></div>
+  <div class="tabbar">${["all",...cats,"Department"].map(c=>`<div class="tab ${peopleFilter===c?'active':''}" data-action="people-filter" data-val="${c}">${c==="all"?"All":c}</div>`).join('')}</div>
+  <div class="grid grid-3">
+  ${filtered.map(p=>`
+    <div class="card row-hover" style="display:flex;gap:10px;align-items:flex-start;" data-action="view-person" data-name="${esc(p.name)}">
+      <div class="avatar-sm">${p.name.split(' ').map(w=>w[0]).slice(0,2).join('')}</div>
+      <div style="min-width:0;">
+        <div style="font-weight:500;font-size:12.5px;">${esc(p.name)}</div>
+        <div style="color:var(--text-faint);font-size:11px;margin-top:1px;">${esc(p.role)}</div>
+        <div style="margin-top:6px;display:flex;gap:6px;"><span class="tag tag-gray">${p.area}</span></div>
+      </div>
+    </div>
+  `).join('')}
+  </div>
+  `;
+}
+
+function modalPersonDetail(name){
+  const p = findPerson(name);
+  if(!p) return `<div class="modal-body"><div class="empty">Person not found.</div></div><div class="modal-foot"><button class="btn" data-action="close-modal">Close</button></div>`;
+  const appts = DB.appointments.filter(a=>a.name===p.name);
+  const cases = DB.cases.filter(c=>c.citizen===p.name);
+  const corr = DB.correspondence.filter(c=>c.relatedPerson===p.name);
+  return `
+  <div class="modal-head"><div><h3>${esc(p.name)}</h3><div class="mh-sub">${esc(p.role)} · ${p.area}</div></div><button class="modal-close" data-action="close-modal">✕</button></div>
+  <div class="modal-body">
+    <div class="ai-box">
+      ${aiChip('AI SUMMARY','summary')}
+      <div class="ai-text">${p.name} has ${p.interactions.length} recorded interaction${p.interactions.length===1?'':'s'} with the office. ${cases.length? `${cases.filter(c=>c.status!=='Resolved').length} case(s) remain active and may require follow-up.` : 'No cases are currently on file.'}</div>
+    </div>
+    <div class="kv"><span class="k">Phone</span><span class="v">${esc(p.phone)}</span></div>
+    <div class="kv"><span class="k">Category</span><span class="v">${p.cat}</span></div>
+    <div class="divider"></div>
+    <div class="section-title">Appointments (${appts.length})</div>
+    ${appts.length?appts.map(a=>`<div class="list-row"><div class="row-main"><div class="row-title">${a.time} — ${a.type}</div><div class="row-sub">${esc(a.purpose)}</div></div>${statusTag(a.status)}</div>`).join(''):'<div class="empty" style="padding:8px 0;">None</div>'}
+    <div class="section-title" style="margin-top:12px;">Cases (${cases.length})</div>
+    ${cases.length?cases.map(c=>`<div class="list-row row-hover" data-action="view-case" data-id="${c.id}"><div class="row-main"><div class="row-title">${c.id} — ${c.category}</div></div>${statusTag(c.status)}</div>`).join(''):'<div class="empty" style="padding:8px 0;">None</div>'}
+    <div class="section-title" style="margin-top:12px;">Correspondence (${corr.length})</div>
+    ${corr.length?corr.map(x=>`<div class="list-row"><div class="row-main row-title">${x.ref} — ${esc(x.subject)}</div>${statusTag(x.status)}</div>`).join(''):'<div class="empty" style="padding:8px 0;">None</div>'}
+    <div class="section-title" style="margin-top:12px;">Timeline</div>
+    ${p.interactions.length?`<div class="tl">${p.interactions.map(h=>`<div class="tl-item"><div class="tl-date">${h.date}</div><div class="tl-text">${esc(h.text)}</div></div>`).join('')}</div>`:'<div class="empty" style="padding:8px 0;">No recorded history</div>'}
+  </div>
+  <div class="modal-foot">
+    <button class="btn btn-sm" data-action="person-new-appt" data-name="${esc(p.name)}">Create appointment</button>
+    <button class="btn btn-sm" data-action="person-new-case" data-name="${esc(p.name)}">Create case</button>
+    <button class="btn" data-action="close-modal">Close</button>
+  </div>
+  `;
+}
+
+function modalDeptDetail(id){
+  const d = findDept(id);
+  const cases = DB.cases.filter(c=>CATEGORY_DEPT[c.category]===d.id);
+  const corr = DB.correspondence.filter(c=>c.department===d.id);
+  return `
+  <div class="modal-head"><div><h3>${d.name}</h3><div class="mh-sub">${d.officer.designation}: ${d.officer.name}</div></div><button class="modal-close" data-action="close-modal">✕</button></div>
+  <div class="modal-body">
+    <div class="kv"><span class="k">Status</span><span class="v">${statusTag(d.status)}</span></div>
+    <div class="kv"><span class="k">Officer contact</span><span class="v">${d.officer.phone}</span></div>
+    <div class="kv"><span class="k">Last contact</span><span class="v">${d.lastContact}</span></div>
+    <div class="kv"><span class="k">Open cases</span><span class="v">${d.openCases}</span></div>
+    <div class="kv"><span class="k">Pending correspondence</span><span class="v">${d.pendingCorrespondence}</span></div>
+    <div class="divider"></div>
+    <div class="section-title">Related cases</div>
+    ${cases.length?cases.map(c=>`<div class="list-row row-hover" data-action="view-case" data-id="${c.id}"><div class="row-main"><div class="row-title">${c.id} — ${esc(c.citizen)}</div></div>${statusTag(c.status)}</div>`).join(''):'<div class="empty" style="padding:8px 0;">None on file</div>'}
+    <div class="section-title" style="margin-top:12px;">Correspondence</div>
+    ${corr.length?corr.map(x=>`<div class="list-row"><div class="row-main row-title">${x.ref} — ${esc(x.subject)}</div>${statusTag(x.status)}</div>`).join(''):'<div class="empty" style="padding:8px 0;">None on file</div>'}
+  </div>
+  <div class="modal-foot"><button class="btn" data-action="close-modal">Close</button></div>
+  `;
+}
+
+/* =========================================================
+   PAGE: VOLUNTEERS
+========================================================= */
+function pageVolunteers(){
+  const v=DB.volunteers;
+  return `
+  <div class="page-head"><div><div class="page-title">Volunteers</div><div class="page-desc">Constituency-wide volunteer network</div></div></div>
+  <div class="grid grid-4" style="margin-bottom:16px;">
+    <div class="card stat-card"><div class="stat-label">Registered</div><div class="stat-value">${v.total.toLocaleString()}</div></div>
+    <div class="card stat-card"><div class="stat-label">Active</div><div class="stat-value">${v.active.toLocaleString()}</div><div class="stat-foot up">${Math.round(v.active/v.total*100)}% of total</div></div>
+    <div class="card stat-card"><div class="stat-label">Inactive</div><div class="stat-value">${v.inactive.toLocaleString()}</div></div>
+    <div class="card stat-card"><div class="stat-label">Areas covered</div><div class="stat-value">${Object.keys(v.byArea).length}</div></div>
+  </div>
+  <div class="card">
+    <div class="section-title">By area</div>
+    ${Object.entries(v.byArea).map(([a,n])=>{
+      const pct=Math.round(n/v.total*100);
+      return `<div style="margin-bottom:10px;"><div style="display:flex;justify-content:space-between;font-size:12px;"><span>${a}</span><span style="font-family:var(--mono);color:var(--text-dim);">${n}</span></div><div class="progress-track"><div class="progress-fill" style="width:${pct*2.2}%;"></div></div></div>`;
+    }).join('')}
+  </div>
+  `;
+}
+
+/* =========================================================
+   PAGE: DOCUMENTS + CORRESPONDENCE
+========================================================= */
+let docExtracted = {};
+let corrTab = "Incoming";
+function pageDocuments(){
+  const CORR_TABS = ["Incoming","Outgoing","Draft","Pending Approval","Dispatched","Awaiting Response"];
+  const mapStatus = { Incoming:"Incoming", Outgoing:"Dispatched", Draft:"Draft", "Pending Approval":"Pending Approval", Dispatched:"Dispatched", "Awaiting Response":"Awaiting Response" };
+  const filteredCorr = DB.correspondence.filter(c=>c.status===mapStatus[corrTab]);
+  return `
+  <div class="page-head"><div><div class="page-title">Documents & Correspondence</div><div class="page-desc">AI-assisted reading of incoming letters plus outgoing correspondence tracking</div></div>
+  <button class="btn btn-primary" data-action="simulate-upload">Upload document</button></div>
+
+  <div class="grid grid-2" style="grid-template-columns:1fr 1.2fr;margin-bottom:18px;">
+    <div class="card">
+      <div class="section-title">AI document inbox</div>
+      ${DB.documents.map(d=>`
+        <div class="list-row row-hover" data-action="open-document" data-id="${d.id}">
+          <div class="row-main"><div class="row-title">${esc(d.name)}</div><div class="row-sub">${esc(d.from)} · ${d.received}</div></div>
+          ${statusTag(d.status)}
+        </div>`).join('')}
+    </div>
+    <div class="card" id="doc-detail">
+      <div class="empty"><div class="empty-title">Select a document</div>Choose a document from the inbox to read the AI extraction.</div>
+    </div>
+  </div>
+
+  <div class="section-title">Correspondence register</div>
+  <div class="tabbar">${CORR_TABS.map(t=>`<div class="tab ${corrTab===t?'active':''}" data-action="corr-tab" data-val="${t}">${t}</div>`).join('')}</div>
+  <div class="card">
+    <table>
+      <thead><tr><th>Ref</th><th>Subject</th><th>Recipient / Sender</th><th>Related</th><th>Due</th><th>Status</th></tr></thead>
+      <tbody>
+      ${filteredCorr.map(c=>`
+        <tr>
+          <td style="font-family:var(--mono);font-size:11px;color:var(--text-dim);">${c.ref}</td>
+          <td style="max-width:220px;">${esc(c.subject)}</td>
+          <td style="color:var(--text-dim);">${esc(c.recipient)}</td>
+          <td>${c.relatedCase?`<span class="link-mini" data-action="view-case" data-id="${c.relatedCase}">${c.relatedCase}</span>`:c.relatedVisit?`<span class="link-mini" data-action="view-visit" data-id="${c.relatedVisit}">${c.relatedVisit}</span>`:'—'}</td>
+          <td>${c.due}</td>
+          <td>${statusTag(c.status)}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>
+    ${filteredCorr.length===0?'<div class="empty">Nothing in this stage.</div>':''}
+  </div>
+  `;
+}
+function docDetailHTML(d){
+  const ex = d.extraction;
+  return `
+    <div class="section-title">${esc(d.name)}</div>
+    <div style="font-size:11.5px;color:var(--text-faint);margin-bottom:12px;">From ${esc(d.from)} · Received ${d.received}</div>
+    <div style="background:var(--bg-elev);border:1px solid var(--border-soft);border-radius:var(--radius-sm);padding:12px;font-size:12px;color:var(--text-dim);margin-bottom:14px;">
+      "Letter requesting the Hon. MP's presence at a community event in Jhajha on 28 September."
+    </div>
+    ${docExtracted[d.id] ? `
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">${aiChip('AI ANALYSIS')}<span style="font-weight:600;font-size:12.5px;">Document understood</span></div>
+    <div class="kv"><span class="k">Event</span><span class="v">${ex.event}</span></div>
+    <div class="kv"><span class="k">Date</span><span class="v">${ex.date}</span></div>
+    <div class="kv"><span class="k">Time</span><span class="v">${ex.time}</span></div>
+    <div class="kv"><span class="k">Location</span><span class="v">${ex.location}</span></div>
+    <div class="kv"><span class="k">Purpose</span><span class="v">${ex.purpose}</span></div>
+    <div class="divider"></div>
+    <div style="font-weight:600;font-size:12.5px;margin-bottom:8px;">Suggested actions</div>
+    ${ex.actions.map((a,i)=>`<div class="list-row"><div class="row-main row-title">${a}</div><button class="btn btn-sm" data-action="doc-action" data-id="${d.id}" data-idx="${i}">Do it</button></div>`).join('')}
+    ` : `<button class="btn btn-primary" data-action="analyze-doc" data-id="${d.id}">Analyze with AI</button>`}
+  `;
+}
+
+/* =========================================================
+   PAGE: COMMUNICATIONS
+========================================================= */
+function pageCommunications(){
+  return `
+  <div class="page-head"><div><div class="page-title">Communications</div><div class="page-desc">Template-based messaging — sensitive templates require approval</div></div></div>
+  <div class="card">
+    <table>
+      <thead><tr><th>Template</th><th>Preview</th><th>Approval</th><th></th></tr></thead>
+      <tbody>
+      ${DB.communications.map((c,i)=>`
+        <tr>
+          <td style="font-weight:500;">${c.name}</td>
+          <td style="color:var(--text-dim);max-width:320px;">${esc(c.body)}</td>
+          <td>${c.approval?'<span class="tag tag-gold">Required</span>':'<span class="tag tag-gray">Auto-send</span>'}</td>
+          <td><button class="btn btn-sm" data-action="send-template" data-idx="${i}">${c.approval?'Send for approval':'Send'}</button></td>
+        </tr>`).join('')}
+      </tbody>
+    </table>
+  </div>
+  `;
+}
+
+/* =========================================================
+   PAGE: IMPORTANT DATES
+========================================================= */
+function pageDates(){
+  return `
+  <div class="page-head"><div><div class="page-title">Important dates</div><div class="page-desc">Today's birthdays, anniversaries and community events</div></div></div>
+  <div class="grid grid-2" style="grid-template-columns:1fr 1fr;">
+  ${DB.importantDates.map(d=>`
+    <div class="card" style="display:flex;justify-content:space-between;align-items:center;">
+      <div><div style="font-weight:500;font-size:12.5px;">${esc(d.name)}</div><div style="font-size:11px;color:var(--text-faint);">${d.occasion} · ${d.cat}</div></div>
+      <button class="btn btn-sm" data-action="prepare-greeting" data-name="${esc(d.name)}">Prepare message</button>
+    </div>
+  `).join('')}
+  </div>
+  `;
+}
+
+/* =========================================================
+   PAGE: TASKS
+========================================================= */
+function pageTasks(){
+  const buckets = [["overdue","Overdue"],["today","Due today"],["upcoming","Upcoming"]];
+  return `
+  <div class="page-head"><div><div class="page-title">Tasks</div><div class="page-desc">Every activity becomes a trackable task</div></div></div>
+  ${buckets.map(([key,label])=>{
+    const items = DB.tasks.filter(t=>t.bucket===key && t.status==="open");
+    if(!items.length) return '';
+    return `<div class="card" style="margin-bottom:14px;">
+      <div class="section-title">${label}<span class="link">${items.length}</span></div>
+      ${items.map(t=>`
+        <div class="list-row">
+          <div class="check-circle" data-action="complete-task" data-id="${t.id}" style="cursor:pointer;"></div>
+          <div class="row-main"><div class="row-title">${esc(t.title)}</div><div class="row-sub">${t.owner} · from ${t.source}</div></div>
+          ${priorityTag(t.priority)}
+          <span class="link-mini" data-action="task-explain" data-id="${t.id}">Why?</span>
+        </div>`).join('')}
+    </div>`;
+  }).join('')}
+  `;
+}
+
+/* =========================================================
+   PAGE: REPORTS
+========================================================= */
+function pageReports(){
+  const bar = (label,val,max,color)=>`
+    <div style="margin-bottom:11px;">
+      <div style="display:flex;justify-content:space-between;font-size:12px;"><span>${label}</span><span style="font-family:var(--mono);color:var(--text-dim);">${val}</span></div>
+      <div class="progress-track"><div class="progress-fill" style="width:${Math.round(val/max*100)}%;background:${color};"></div></div>
+    </div>`;
+  return `
+  <div class="page-head"><div><div class="page-title">Reports</div><div class="page-desc">Office performance and constituency analytics</div></div>
+  <button class="btn btn-sm" data-action="explain-reports">Explain changes</button></div>
+  <div id="report-explain"></div>
+  <div class="grid grid-2" style="grid-template-columns:1fr 1fr;">
+    <div class="card">
+      <div class="section-title">This month — MP activity</div>
+      ${bar('Meetings held',86,100,'var(--teal)')}
+      ${bar('Constituency visits',6,8,'var(--gold)')}
+      ${bar('Cases resolved',34,60,'var(--teal)')}
+      ${bar('Cases pending',26,60,'var(--red)')}
+    </div>
+    <div class="card">
+      <div class="section-title">Appointment funnel</div>
+      ${bar('Requests received',142,142,'var(--blue)')}
+      ${bar('Approved',118,142,'var(--teal)')}
+      ${bar('Completed',101,142,'var(--teal)')}
+      ${bar('No-show',9,142,'var(--red)')}
+    </div>
+    <div class="card">
+      <div class="section-title">Cases by category</div>
+      ${['Road','Pension','Water','Electricity','Land','Education'].map((c,i)=>bar(c,[18,14,11,9,7,6][i],18,'var(--gold)')).join('')}
+    </div>
+    <div class="card">
+      <div class="section-title">Office / staff performance</div>
+      ${bar('Tasks completed on time',77,100,'var(--teal)')}
+      ${bar('Avg. response time (hrs, inverted)',68,100,'var(--blue)')}
+      ${bar('Overdue tasks',2,20,'var(--red)')}
+    </div>
+  </div>
+  `;
+}
+
+/* =========================================================
+   PAGE: AI ASSISTANT
+========================================================= */
+let chatHistory = [
+  {role:"ai",text:"Good morning. I can answer questions about today's schedule, cases, documents, correspondence and visits — only for data your role can access. Try one of the questions below, or type your own."}
+];
+const chatSuggestions = [
+  "What happened with the Jhajha road issue?",
+  "Show me all pending matters related to Jhajha.",
+  "What are today's priority items?",
+  "Which cases are waiting for department responses?",
+  "Prepare tomorrow's briefing.",
+];
+function pageAssistant(){
+  return `
+  <div class="page-head"><div><div class="page-title">AI Assistant</div><div class="page-desc">Answers are scoped to data your current role can access (${ROLES.find(r=>r.id===currentRole).label})</div></div></div>
+  <div class="chat-wrap">
+    <div class="chat-log" id="chat-log">
+      ${chatHistory.map(m=>`<div class="chat-msg ${m.role}">${esc(m.text)}</div>`).join('')}
+    </div>
+    <div class="chat-suggest">${chatSuggestions.map(s=>`<div class="chip-btn" data-action="chat-suggest" data-q="${esc(s)}">${s}</div>`).join('')}</div>
+    <div class="chat-input-row">
+      <input id="chat-input" placeholder="Ask about today's meetings, cases, documents…">
+      <button class="btn btn-primary" data-action="chat-send">Send</button>
+    </div>
+  </div>
+  `;
+}
+function aiAnswer(q){
+  const ql = q.toLowerCase();
+  if(ql.includes('jhajha road') || (ql.includes('jhajha') && ql.includes('happened'))){
+    const c = findCase('CS-2201');
+    return `Jhajha road issue (Case ${c.id}):\nStatus: ${c.status} · Priority: ${c.priority}\nRaised ${c.created}, last updated ${c.updated}.\nTimeline: ${c.timeline.map(t=>t.text).join(' → ')}\nNext action: ${c.nextAction}\nRelated correspondence: IP/JAM/2026/0048, awaiting response from Rural Development Dept.`;
+  }
+  if(ql.includes('pending') && ql.includes('jhajha')){
+    const cases = DB.cases.filter(c=>c.location==='Jhajha' && c.status!=='Resolved');
+    const corr = DB.correspondence.filter(c=>DB.cases.find(x=>x.id===c.relatedCase && x.location==='Jhajha') || c.relatedVisit==='VS-14');
+    return `Pending matters related to Jhajha:\nCases (${cases.length}): ${cases.map(c=>`${c.id} (${c.category})`).join(', ')}\nCorrespondence (${corr.length}): ${corr.map(c=>c.ref).join(', ')}\nUpcoming visit: today, 1:00 PM.`;
+  }
+  if(ql.includes('priority') && ql.includes('today')){
+    const highCases = DB.cases.filter(c=>c.priority==='High'&&c.status!=='Resolved');
+    const approvals = DB.approvals.filter(a=>!['Dispatched','Rejected'].includes(a.stage));
+    return `Today's priority items:\n— ${highCases.length} high-priority cases: ${highCases.map(c=>c.id).join(', ')}\n— ${approvals.length} items pending in the Approval Center\n— ${DB.tasks.filter(t=>t.bucket==='overdue'&&t.status==='open').length} overdue follow-up tasks`;
+  }
+  if(ql.includes('waiting') && ql.includes('department')){
+    const corr = DB.correspondence.filter(c=>c.status==='Awaiting Response');
+    return `Correspondence awaiting a department response:\n` + corr.map(c=>`— ${c.ref} · ${c.subject} · due ${c.due}`).join('\n');
+  }
+  if(ql.includes('tomorrow') && ql.includes('briefing')){
+    return "Tomorrow's briefing:\n— No confirmed meetings yet; 1 pending request (Sono Traders follow-up)\n— Chakai school inauguration visit planned for 28 Sep\n— 2 tasks due\nWould you like me to draft calendar holds for the pending items?";
+  }
+  if(ql.includes('tomorrow')){
+    return "Tomorrow currently has no confirmed meetings on the calendar. The Chakai visit is planned for 28 September, and 2 tasks are due tomorrow.";
+  }
+  if(ql.includes('jhajha') && ql.includes('week')){
+    return "This week in Jhajha:\n— Today, 1:00 PM: Constituency visit (community meeting, infrastructure review, local delegation)\n— Ramesh Pandey (District Administration) at 9:30 AM regarding the Jhajha road stretch\n— Case CS-2201 (road) and CS-2131 (education) are both open in Jhajha";
+  }
+  if(ql.includes('pending') && ql.includes('case')){
+    const old = DB.cases.filter(c=>c.days>15 && c.status!=='Resolved');
+    return `${old.length} cases have been open more than 15 days:\n` + old.map(c=>`— ${c.id} · ${c.citizen} · ${c.category} · ${c.location} · ${c.days} days`).join('\n');
+  }
+  if(ql.includes('protocol') && ql.includes('draft')){
+    return "Draft protocol communication — Jhajha visit:\n\n\"The office of Hon. Arun Bharti, MP, Jamui, wishes to inform the district administration and Jhajha police station of a scheduled constituency visit today, arriving 11:30 AM.\"\n\nThis draft is in the Approval Center awaiting staff review.";
+  }
+  if(ql.includes('meeting') && ql.includes('prepare')){
+    return "To prepare for a specific person's meeting, open their profile from People and I'll summarize their history, open cases and past correspondence.";
+  }
+  if(ql.includes('birthday') || ql.includes('important date')){
+    return `Today's important dates: ${DB.importantDates.map(d=>`${d.name} (${d.occasion})`).join(', ')}.`;
+  }
+  if(ql.includes('meeting') && (ql.includes('today') || ql.includes('how many'))){
+    return `There are ${DB.appointments.length} meetings today: ${DB.appointments.map(a=>a.time).join(', ')}.`;
+  }
+  return "I can help with today's schedule, appointments, cases, documents, correspondence, visits and protocol status. Could you rephrase, or try one of the suggested questions below?";
+}
+
+/* =========================================================
+   PAGE: SETTINGS
+========================================================= */
+let settingsTab = "users";
+function pageSettings(){
+  const tabs = [["users","Users & roles"],["capacity","Appointment rules"],["branding","Office branding"],["audit","Audit log"],["demo","Demo"]];
+  let body='';
+  if(settingsTab==="users"){
+    body = `<div class="card"><table><thead><tr><th>User</th><th>Role</th><th>Status</th></tr></thead><tbody>
+      ${ROLES.map((r,i)=>`<tr><td>${["Arun Bharti","Priya Nair","Suresh Ojha","Puja Bharti","Manish Thakur","Alok Verma","Divya Rani","Rajeev Kumar"][i]}</td><td>${r.label}</td><td><span class="tag tag-teal">Active</span></td></tr>`).join('')}
+    </tbody></table></div>`;
+  } else if(settingsTab==="capacity"){
+    body = `<div class="card">${Object.entries(DB.capacity).map(([k,v])=>`
+      <div class="field-row" style="align-items:end;margin-bottom:4px;">
+        <div class="field"><label>${k} — daily maximum</label><input type="number" value="${v.max}" data-action="set-capacity" data-key="${k}" min="0"></div>
+        <div class="field"><label>Currently used today</label><input value="${v.used}" disabled></div>
+      </div>`).join('')}</div>`;
+  } else if(settingsTab==="branding"){
+    body = `<div class="card">
+      <div class="kv"><span class="k">MP name</span><span class="v">${OFFICE.mp}</span></div>
+      <div class="kv"><span class="k">Constituency</span><span class="v">${OFFICE.constituency} Lok Sabha, ${OFFICE.state}</span></div>
+      <div class="kv"><span class="k">Office</span><span class="v">${OFFICE.officeName}</span></div>
+      <div class="kv"><span class="k">Letterhead</span><span class="v" style="color:var(--text-faint);">Configured — demonstration template</span></div>
+      <div class="role-note">Branding, letterhead and signature assets are configured per office in the multi-office architecture, so this instance can later be white-labelled for another MP.</div>
+    </div>`;
+  } else if(settingsTab==="audit"){
+    body = `<div class="card">${DB.auditLog.map(a=>`<div class="list-row"><div class="row-time">${a.time}</div><div class="row-main row-title">${esc(a.text)}</div></div>`).join('')}</div>`;
+  } else if(settingsTab==="demo"){
+    body = `<div class="card">
+      <div style="font-weight:600;font-size:13px;margin-bottom:6px;">Demonstration environment</div>
+      <div style="font-size:12px;color:var(--text-dim);margin-bottom:14px;">This is a safe, self-contained demo. No real government systems, citizens or officials are connected. You can reset all data to its original state at any time.</div>
+      <button class="btn btn-red" data-action="reset-demo">Reset demo data</button>
+    </div>`;
+  }
+  return `
+  <div class="page-head"><div><div class="page-title">Settings</div><div class="page-desc">Users, permissions, appointment rules and office configuration</div></div></div>
+  <div class="tabbar">${tabs.map(([k,l])=>`<div class="tab ${settingsTab===k?'active':''}" data-action="settings-tab" data-val="${k}">${l}</div>`).join('')}</div>
+  ${body}
+  `;
+}
+
+/* =========================================================
+   MAIN RENDER
+========================================================= */
+const PAGES = {
+  command:pageCommand, inbox:pageInbox, appointments:pageAppointments, calendar:pageCalendar,
+  constituency:pageConstituency, cases:pageCases, visits:pageVisits, protocol:pageProtocol, approvals:pageApprovals,
+  people:pagePeople, volunteers:pageVolunteers, documents:pageDocuments, communications:pageCommunications,
+  dates:pageDates, tasks:pageTasks, reports:pageReports, assistant:pageAssistant, settings:pageSettings,
+};
+
+function renderAll(){
+  renderSidebar();
+  renderTopbar();
+  document.getElementById('content').innerHTML = PAGES[route]();
+  if(route==='documents' && window.__openDoc){
+    const d = DB.documents.find(x=>x.id===window.__openDoc);
+    if(d) document.getElementById('doc-detail').innerHTML = docDetailHTML(d);
+  }
+}
+
+/* =========================================================
+   MODAL HELPERS
+========================================================= */
+function openModal(html, lg){
+  const box=document.getElementById('modal-box');
+  box.className = 'modal' + (lg?' modal-lg':'');
+  box.innerHTML = html;
+  document.getElementById('modal-overlay').classList.add('show');
+}
+function closeModal(){ document.getElementById('modal-overlay').classList.remove('show'); }
+document.getElementById('modal-overlay').addEventListener('click',e=>{ if(e.target.id==='modal-overlay') closeModal(); });
+
+/* =========================================================
+   GLOBAL CLICK DELEGATION (works for #content AND modal)
+========================================================= */
+document.addEventListener('click', function(e){
+  const navEl = e.target.closest('[data-nav]');
+  const actEl = e.target.closest('[data-action]');
+
+  if(navEl){
+    route = navEl.dataset.nav; renderAll();
+    if(navEl.dataset.action){ /* also has an action, fall through */ } else { return; }
+  }
+  if(!actEl) return;
+  const a = actEl.dataset.action;
+  const id = actEl.dataset.id, val = actEl.dataset.val, name = actEl.dataset.name, idx = actEl.dataset.idx;
+
+  switch(a){
+    case 'prepare-day': { const b=document.getElementById('briefing-box'); if(b) b.classList.add('show'); toast('Briefing prepared'); break; }
+
+    case 'open-new-appt': openModal(modalNewAppointment()); break;
+    case 'view-appt': openModal(modalViewAppointment(id)); break;
+    case 'close-modal': closeModal(); break;
+    case 'submit-appt': {
+      const gv = elId=>document.getElementById(elId)?.value||'';
+      const name_ = gv('f-name')||'New visitor', org=gv('f-org')||'—', type=gv('f-type'), time_=gv('f-time')||'TBD', priority=gv('f-priority'), purpose=gv('f-purpose')||'—';
+      const nid = "AP-"+Math.floor(100+Math.random()*800);
+      DB.appointments.push({id:nid,name:name_,org,phone:gv('f-phone')||'—',type,time:time_,status:"Pending",priority,purpose,completed:false});
+      if(DB.capacity[type]) DB.capacity[type].used++;
+      log(`PA created appointment ${nid} (${type} — ${name_})`);
+      closeModal(); route="appointments"; renderAll(); toast('Appointment created');
+      break;
+    }
+    case 'confirm-appt': { const ap=DB.appointments.find(x=>x.id===id); ap.status="Confirmed"; log(`Appointment ${ap.id} confirmed`); closeModal(); renderAll(); toast('Appointment confirmed'); break; }
+    case 'reject-appt': { const ap=DB.appointments.find(x=>x.id===id); ap.status="Declined"; log(`Appointment ${ap.id} declined`); closeModal(); renderAll(); toast('Appointment declined'); break; }
+    case 'prep-brief': {
+      aiWork(actEl, 'Preparing meeting brief…', ()=>{
+        const ap=DB.appointments.find(x=>x.id===id); const p=findPerson(ap.name);
+        const slot=document.getElementById('meeting-brief-slot');
+        if(slot) slot.innerHTML = `<div class="ai-box" style="margin-top:12px;">${aiChip('AI SUGGESTION','suggestion')}<div class="ai-text">Brief for ${ap.name}: ${p&&p.interactions.length? `${p.interactions.length} prior interaction(s) on file, most recently "${p.interactions[p.interactions.length-1].text}".`:'No prior interactions on file — first meeting with this office.'} Suggested focus: ${ap.purpose}</div></div>`;
+        log(`AI prepared meeting brief for ${ap.name}`); toast('Meeting brief ready');
+      });
+      break;
+    }
+    case 'mark-completed': { closeModal(); const ap=DB.appointments.find(x=>x.id===id); openModal(modalMeetingNotes(ap.id)); break; }
+    case 'gen-meeting-summary': {
+      aiWork(actEl, 'Generating AI meeting summary…', ()=>{
+        const ap=DB.appointments.find(x=>x.id===id);
+        ap.completed=true; ap.status="Confirmed";
+        const t1={id:"TK-"+Math.floor(600+Math.random()*300),title:`Contact District Administration re: ${ap.purpose}`,owner:"Constituency Coordinator",due:"25 September",priority:"Medium",source:`Meeting with ${ap.name}`,status:"open",bucket:"today"};
+        const t2={id:"TK-"+Math.floor(600+Math.random()*300),title:"Prepare supporting document",owner:"Office Manager",due:"27 September",priority:"Medium",source:`Meeting with ${ap.name}`,status:"open",bucket:"upcoming"};
+        const slot=document.getElementById('ai-summary-slot');
+        if(slot) slot.innerHTML = `
+          <div class="ai-box" style="margin-top:6px;">${aiChip('AI SUMMARY','summary')}
+          <div class="ai-text">Meeting with ${ap.name} covered: ${ap.purpose}. Two action items were identified.</div>
+          <div class="divider"></div>
+          <div class="kv"><span class="k">Action 1</span><span class="v">Contact District Administration</span></div>
+          <div class="kv"><span class="k">Owner</span><span class="v">Constituency Coordinator</span></div>
+          <div class="kv"><span class="k">Deadline</span><span class="v">25 September</span></div>
+          <div class="divider"></div>
+          <div class="kv"><span class="k">Action 2</span><span class="v">Prepare supporting document</span></div>
+          <div class="kv"><span class="k">Owner</span><span class="v">Office Manager</span></div>
+          <div class="kv"><span class="k">Deadline</span><span class="v">27 September</span></div>
+          </div>
+          <button class="btn btn-primary btn-sm" data-action="create-all-tasks" data-t1="${t1.id}" data-t2="${t2.id}">Create all tasks</button>`;
+        window.__pendingMeetingTasks = [t1,t2];
+        log(`AI generated meeting summary for ${ap.name}`);
+      });
+      break;
+    }
+    case 'create-all-tasks': {
+      (window.__pendingMeetingTasks||[]).forEach(t=>DB.tasks.push(t));
+      log('2 tasks created from meeting summary');
+      window.__pendingMeetingTasks=[];
+      closeModal(); renderAll(); toast('Tasks created');
+      break;
+    }
+
+    case 'case-filter': caseFilter=val; renderAll(); break;
+    case 'people-filter': peopleFilter=val; renderAll(); break;
+    case 'settings-tab': settingsTab=val; if(!navEl) renderAll(); break;
+    case 'corr-tab': corrTab=val; renderAll(); break;
+
+    case 'advance-protocol': {
+      const steps=DB.protocol["VS-14"]; let d=DB.protocolProgress["VS-14"];
+      if(d < steps.length){ DB.protocolProgress["VS-14"] = d+1; log(`Protocol advanced to '${steps[d]}'`); toast(steps[d]+' completed'); }
+      renderAll();
+      break;
+    }
+
+    case 'open-document': { window.__openDoc=id; const d=DB.documents.find(x=>x.id===id); d.status="Read"; renderAll(); break; }
+    case 'analyze-doc': {
+      aiWork(actEl, 'AI is reading the document…', ()=>{
+        docExtracted[id]=true; log('AI extracted structured data from document');
+        const d=DB.documents.find(x=>x.id===id); const slot=document.getElementById('doc-detail');
+        if(slot) slot.innerHTML = docDetailHTML(d);
+        toast('Document analyzed');
+      });
+      break;
+    }
+    case 'doc-action': {
+      const d = DB.documents.find(x=>x.id===id); const label=d.extraction.actions[idx];
+      log(`AI action executed: ${label}`); toast(`${label} — done`);
+      actEl.textContent='Done'; actEl.disabled=true;
+      break;
+    }
+    case 'simulate-upload': toast('Document received — added to inbox'); break;
+
+    case 'prepare-greeting': toast(`Greeting drafted for ${name} — pending approval`); log(`AI drafted greeting for ${name}`); break;
+    case 'send-template': { const c=DB.communications[idx]; if(c.approval){ toast('Sent for approval'); log(`Communication '${c.name}' sent for approval`);} else { toast('Sent'); log(`Communication '${c.name}' sent`);} break; }
+
+    case 'complete-task': { const t=DB.tasks.find(x=>x.id===id); t.status="done"; log(`Task completed: ${t.title}`); renderAll(); toast('Task completed'); break; }
+    case 'task-explain': {
+      const t=DB.tasks.find(x=>x.id===id);
+      toast(`Priority ${t.priority}: due ${t.due}, from ${t.source}`);
+      break;
+    }
+    case 'explain-reports': {
+      const slot=document.getElementById('report-explain');
+      if(slot) slot.innerHTML = `<div class="ai-box">${aiChip('AI SUMMARY','summary')}<div class="ai-text">Cases resolved are up compared to last month, driven mainly by faster PWD responses in Jhajha. Overdue tasks remain low. No-shows are concentrated in Direct meeting slots.</div></div>`;
+      break;
+    }
+
+    case 'set-capacity': break; /* handled by input event listener */
+
+    case 'chat-send': sendChat(); break;
+    case 'chat-suggest': { chatHistory.push({role:'user',text:val||name}); chatHistory.push({role:'ai',text:aiAnswer(val||name)}); renderAll(); scrollChat(); break; }
+
+    /* ---- Office Inbox ---- */
+    case 'open-inbox': inboxOpenId=id; renderAll(); break;
+    case 'inbox-create-case': {
+      aiWork(actEl, 'Creating case from AI analysis…', ()=>{
+        const item = DB.inbox.find(x=>x.id===id);
+        const nid = "CS-"+Math.floor(2210+Math.random()*90);
+        const newCase = {id:nid,citizen:item.sender,location:item.aiAnalysis.area,category:"Road",status:"New",priority:item.aiAnalysis.priority,days:0,deadline:item.aiAnalysis.deadline,
+          created:"25 Sep",updated:"25 Sep",nextAction:"Assign to "+item.aiAnalysis.suggestedOwner,
+          timeline:[{date:"25 Sep",text:"Complaint received via "+item.source},{date:"25 Sep",text:"AI classified as "+item.aiAnalysis.category}],notes:[],docs:[]};
+        DB.cases.push(newCase);
+        item.relatedCase = nid; item.aiStatus="ASSIGNED"; item.assignedStaff=item.aiAnalysis.suggestedOwner;
+        log(`Case ${nid} created from inbox item ${item.id}`);
+        renderAll(); toast(`Case ${nid} created`);
+      });
+      break;
+    }
+    case 'inbox-create-task': {
+      const item = DB.inbox.find(x=>x.id===id);
+      const tid = "TK-"+Math.floor(700+Math.random()*90);
+      DB.tasks.push({id:tid,title:`Follow up: ${item.subject}`,owner:item.aiAnalysis.suggestedOwner,due:item.aiAnalysis.deadline||"Soon",priority:item.priority,source:`Inbox ${item.id}`,status:"open",bucket:"today"});
+      log(`Task ${tid} created from inbox item ${item.id}`);
+      renderAll(); toast('Task created');
+      break;
+    }
+    case 'inbox-assign': { const item=DB.inbox.find(x=>x.id===id); item.assignedStaff=item.aiAnalysis.suggestedOwner; item.aiStatus="ASSIGNED"; log(`Inbox item ${item.id} assigned to ${item.assignedStaff}`); renderAll(); toast('Assigned'); break; }
+    case 'inbox-draft': {
+      aiWork(actEl, 'AI is drafting a response…', ()=>{
+        const item=DB.inbox.find(x=>x.id===id);
+        const aid = "AC-"+Math.floor(4+Math.random()*90);
+        DB.approvals.push({id:aid,title:`Response — ${item.subject}`,subtype:"Citizen Response",preparedBy:"AI Assistant",reviewedBy:"—",stage:"AI Prepared",relatedRef:null,relatedCase:item.relatedCase,relatedVisit:item.relatedVisit||null,
+          content:`Dear ${item.sender},\n\nThank you for reaching out regarding "${item.subject}". The office has noted this matter and will follow up shortly.\n\nOffice of the Member of Parliament, Jamui`,
+          history:[{time:"now",text:"AI prepared draft from inbox item "+item.id}]});
+        item.aiStatus="WAITING";
+        log(`AI drafted response for inbox item ${item.id} — sent to Approval Center`);
+        renderAll(); toast('Draft created — sent to Approval Center');
+      });
+      break;
+    }
+    case 'inbox-calendar': { const item=DB.inbox.find(x=>x.id===id); log(`Calendar entry added from inbox item ${item.id}`); toast('Added to calendar'); break; }
+    case 'inbox-complete': { const item=DB.inbox.find(x=>x.id===id); item.aiStatus="COMPLETED"; log(`Inbox item ${item.id} marked complete`); renderAll(); toast('Marked complete'); break; }
+
+    /* ---- Case 360 ---- */
+    case 'view-case': closeModal(); caseModalTab="Overview"; openModal(modalCaseDetail(id), true); break;
+    case 'case-tab': caseModalTab=val; openModal(modalCaseDetail(id), true); break;
+    case 'case-summarize': {
+      aiWork(actEl, 'Re-summarizing case…', ()=>{
+        openModal(modalCaseDetail(id), true); toast('Summary refreshed');
+      });
+      break;
+    }
+    case 'case-followup': {
+      const c=findCase(id); c.timeline.push({date:"25 Sep",text:"AI suggested next follow-up: "+c.nextAction});
+      const tid="TK-"+Math.floor(700+Math.random()*90);
+      DB.tasks.push({id:tid,title:`Follow up on ${c.id} — ${c.nextAction}`,owner:"Case Manager",due:"In 3 days",priority:c.priority,source:`Case ${c.id}`,status:"open",bucket:"upcoming"});
+      log(`Follow-up generated for case ${c.id}`);
+      openModal(modalCaseDetail(id), true); toast('Follow-up task created');
+      break;
+    }
+    case 'case-draft-letter': {
+      aiWork(actEl, 'AI is drafting a letter…', ()=>{
+        const c=findCase(id); const dept=findDept(CATEGORY_DEPT[c.category]);
+        const aid="AC-"+Math.floor(4+Math.random()*90);
+        DB.approvals.push({id:aid,title:`Draft letter — ${c.category} issue, ${c.location}`,subtype:"Draft Letter",preparedBy:"AI Assistant",reviewedBy:"—",stage:"AI Prepared",relatedRef:null,relatedCase:c.id,relatedVisit:null,
+          content:`To ${dept?dept.officer.designation:'the concerned department'},\n\nThe office of Hon. Arun Bharti, MP, Jamui, forwards a constituent complaint (Case ${c.id}) regarding a ${c.category.toLowerCase()} issue in ${c.location}. We request an update at the earliest.\n\nRegards,\nOffice of the Member of Parliament, Jamui`,
+          history:[{time:"now",text:"AI prepared draft from case "+c.id}]});
+        c.timeline.push({date:"25 Sep",text:"AI drafted follow-up letter — sent to Approval Center"});
+        log(`AI drafted letter for case ${c.id} — sent to Approval Center`);
+        openModal(modalCaseDetail(id), true); toast('Draft sent to Approval Center');
+      });
+      break;
+    }
+    case 'case-create-task': {
+      const c=findCase(id); const tid="TK-"+Math.floor(700+Math.random()*90);
+      DB.tasks.push({id:tid,title:`Action required — ${c.id}`,owner:"Case Manager",due:"In 2 days",priority:c.priority,source:`Case ${c.id}`,status:"open",bucket:"today"});
+      log(`Task created for case ${c.id}`);
+      openModal(modalCaseDetail(id), true); toast('Task created');
+      break;
+    }
+    case 'case-add-note': {
+      const noteInput=document.getElementById('new-case-note'); const val_=noteInput?noteInput.value.trim():'';
+      if(val_){ const c=findCase(id); c.notes.push(val_); log(`Note added to case ${c.id}`); }
+      openModal(modalCaseDetail(id), true);
+      break;
+    }
+
+    /* ---- Visit Command Center ---- */
+    case 'view-visit': closeModal(); openModal(modalVisitDetail(id), true); break;
+    case 'toggle-visit-check': { const v=findVisit(id); v.checklist[idx].done=!v.checklist[idx].done; openModal(modalVisitDetail(id), true); break; }
+    case 'visit-brief': {
+      aiWork(actEl, 'Generating visit briefing…', ()=>{
+        const v=findVisit(id);
+        const cases = DB.cases.filter(c=>c.location===v.place && c.status!=='Resolved').length;
+        const corr = DB.correspondence.filter(c=>c.relatedVisit===v.id && c.status==='Awaiting Response').length || DB.correspondence.filter(c=>c.department && DB.cases.find(x=>x.location===v.place)).length;
+        const prevMeetings = DB.appointments.filter(a=>a.org && a.org.toLowerCase().includes(v.place.toLowerCase())).length + 1;
+        const slot = document.getElementById('visit-brief-text');
+        if(slot) slot.textContent = `Before this visit, there are ${cases} relevant case(s), ${corr} pending department matter(s) and ${prevMeetings} previous meeting(s) associated with ${v.place}.`;
+        log(`AI generated visit briefing for ${v.place}`);
+      });
+      break;
+    }
+
+    /* ---- Approval Center ---- */
+    case 'approval-source': {
+      const ap=DB.approvals.find(x=>x.id===id);
+      openModal(`<div class="modal-head"><h3>${esc(ap.title)}</h3><button class="modal-close" data-action="close-modal">✕</button></div><div class="modal-body"><div class="ai-text" style="font-size:12.5px;">${esc(ap.content)}</div></div><div class="modal-foot"><button class="btn" data-action="close-modal">Close</button></div>`);
+      break;
+    }
+    case 'approval-audit': {
+      const ap=DB.approvals.find(x=>x.id===id);
+      openModal(`<div class="modal-head"><h3>Audit trail</h3><div class="mh-sub">${esc(ap.title)}</div><button class="modal-close" data-action="close-modal">✕</button></div><div class="modal-body">${ap.history.map(h=>`<div class="list-row"><div class="row-time">${h.time}</div><div class="row-main row-title">${esc(h.text)}</div></div>`).join('')}</div><div class="modal-foot"><button class="btn" data-action="close-modal">Close</button></div>`);
+      break;
+    }
+    case 'approval-advance': {
+      const ap=DB.approvals.find(x=>x.id===id);
+      const i = APPROVAL_STAGES.indexOf(ap.stage);
+      if(ap.stage==='Authorized Approval'){
+        ap.stage='Dispatched';
+        ap.history.push({time:"now",text:"Authorized user approved and dispatched"});
+        if(ap.relatedRef){ const c=DB.correspondence.find(x=>x.ref===ap.relatedRef); if(c) c.status='Dispatched'; }
+        if(ap.relatedCase){ const c=findCase(ap.relatedCase); if(c) c.timeline.push({date:"25 Sep",text:"Approved by authorized staff and dispatched"}); }
+        log(`${ap.title} approved and dispatched`);
+        toast('Approved and dispatched');
+      } else {
+        ap.stage = APPROVAL_STAGES[i+1];
+        ap.history.push({time:"now",text:`Moved to ${ap.stage}`});
+        log(`${ap.title} moved to ${ap.stage}`);
+        toast(`Moved to ${ap.stage}`);
+      }
+      renderAll();
+      break;
+    }
+    case 'approval-changes': { const ap=DB.approvals.find(x=>x.id===id); ap.stage='AI Prepared'; ap.history.push({time:"now",text:"Changes requested — returned to AI draft"}); log(`Changes requested on ${ap.title}`); renderAll(); toast('Sent back for changes'); break; }
+    case 'approval-reject': { const ap=DB.approvals.find(x=>x.id===id); ap.stage='Rejected'; ap.history.push({time:"now",text:"Rejected by authorized user"}); log(`${ap.title} rejected`); renderAll(); toast('Rejected'); break; }
+
+    /* ---- Person 360 / Department ---- */
+    case 'view-person': closeModal(); openModal(modalPersonDetail(name), true); break;
+    case 'view-dept': closeModal(); openModal(modalDeptDetail(id), true); break;
+    case 'person-new-appt': {
+      const nid="AP-"+Math.floor(100+Math.random()*800);
+      DB.appointments.push({id:nid,name:name,org:"—",phone:"—",type:"Direct",time:"TBD",status:"Pending",priority:"Medium",purpose:"Follow-up meeting",completed:false});
+      log(`Appointment ${nid} created for ${name}`); closeModal(); route="appointments"; renderAll(); toast('Appointment created');
+      break;
+    }
+    case 'person-new-case': {
+      const nid="CS-"+Math.floor(2210+Math.random()*90);
+      DB.cases.push({id:nid,citizen:name,location:"Jamui Sadar",category:"Road",status:"New",priority:"Medium",days:0,deadline:"TBD",created:"25 Sep",updated:"25 Sep",nextAction:"Assign to case manager",timeline:[{date:"25 Sep",text:"Case created manually"}],notes:[],docs:[]});
+      log(`Case ${nid} created for ${name}`); closeModal(); route="cases"; renderAll(); toast('Case created');
+      break;
+    }
+
+    /* ---- Settings / Demo ---- */
+    case 'reset-demo': {
+      DB = JSON.parse(JSON.stringify(INITIAL_DB));
+      route="command"; currentRole="pa"; caseFilter="all"; peopleFilter="all"; settingsTab="users"; corrTab="Incoming";
+      docExtracted={}; window.__openDoc=null; inboxOpenId=null; caseModalTab="Overview";
+      chatHistory=[{role:"ai",text:"Good morning. I can answer questions about today's schedule, cases, documents, correspondence and visits — only for data your role can access. Try one of the questions below, or type your own."}];
+      const sel=document.getElementById('role-select'); if(sel) sel.dataset.init="";
+      closeModal(); renderAll(); toast('Demo data reset');
+      break;
+    }
+  }
+});
+
+function sendChat(){
+  const inp=document.getElementById('chat-input'); if(!inp || !inp.value.trim()) return;
+  const q=inp.value.trim(); chatHistory.push({role:'user',text:q});
+  chatHistory.push({role:'ai',text:aiAnswer(q)});
+  renderAll(); scrollChat();
+}
+function scrollChat(){ const l=document.getElementById('chat-log'); if(l) l.scrollTop=l.scrollHeight; }
+
+/* input-based bindings that need re-attachment (delegated where possible via 'input'/'keydown') */
+document.addEventListener('keydown', e=>{
+  if((e.metaKey||e.ctrlKey) && e.key.toLowerCase()==='k'){ e.preventDefault(); document.getElementById('global-search').focus(); }
+  if(e.target && e.target.id==='chat-input' && e.key==='Enter') sendChat();
+});
+document.addEventListener('input', e=>{
+  if(e.target && e.target.dataset && e.target.dataset.action==='set-capacity'){
+    DB.capacity[e.target.dataset.key].max = parseInt(e.target.value)||0; toast('Capacity updated');
+  }
+});
+
+/* NOTIFICATIONS */
+document.getElementById('notif-btn').addEventListener('click', e=>{
+  e.stopPropagation();
+  const p=document.getElementById('notif-panel');
+  p.innerHTML = `<div class="notif-head">Notifications</div>` + DB.notifications.map(n=>`<div class="notif-item"><div class="ndot"></div><div><div>${esc(n.text)}</div><div class="notif-time">${n.time}</div></div></div>`).join('');
+  p.classList.toggle('show');
+});
+document.addEventListener('click', e=>{ if(!e.target.closest('#notif-btn')) document.getElementById('notif-panel').classList.remove('show'); });
+
+/* GLOBAL SEARCH */
+document.getElementById('global-search').addEventListener('input', function(){
+  const q=this.value.trim().toLowerCase();
+  const box=document.getElementById('search-results');
+  if(!q){ box.classList.remove('show'); return; }
+  const appts = DB.appointments.filter(a=>a.name.toLowerCase().includes(q)||a.purpose.toLowerCase().includes(q));
+  const cases = DB.cases.filter(c=>c.citizen.toLowerCase().includes(q)||c.category.toLowerCase().includes(q)||c.location.toLowerCase().includes(q));
+  const people = DB.people.filter(p=>p.name.toLowerCase().includes(q)||p.role.toLowerCase().includes(q));
+  const docs = DB.documents.filter(d=>d.name.toLowerCase().includes(q));
+  const tasks = DB.tasks.filter(t=>t.title.toLowerCase().includes(q));
+  const corr = DB.correspondence.filter(c=>c.subject.toLowerCase().includes(q)||c.recipient.toLowerCase().includes(q)||c.ref.toLowerCase().includes(q));
+  const depts = DB.departments.filter(d=>d.name.toLowerCase().includes(q));
+  const visits = DB.visits.filter(v=>v.place.toLowerCase().includes(q));
+  const groups = [
+    ["Appointments",appts.map(a=>`${a.name} — ${a.time}`)],
+    ["Cases",cases.map(c=>`${c.id} · ${c.citizen} · ${c.category}`)],
+    ["Correspondence",corr.map(c=>`${c.ref} · ${c.subject}`)],
+    ["People",people.map(p=>`${p.name} — ${p.role}`)],
+    ["Departments",depts.map(d=>d.name)],
+    ["Visits",visits.map(v=>`${v.place} — ${v.date}`)],
+    ["Documents",docs.map(d=>d.name)],
+    ["Tasks",tasks.map(t=>t.title)]
+  ].filter(g=>g[1].length);
+  box.innerHTML = (groups.length ? groups.map(([label,items])=>`<div class="sr-group"><div class="sr-group-title">${label}</div>${items.map(i=>`<div class="sr-item">${esc(i)}</div>`).join('')}</div>`).join('') : `<div class="sr-group"><div class="sr-item" style="color:var(--text-faint);">No matches</div></div>`)
+    + `<div class="sr-ask" data-action="chat-suggest" data-q="${esc(this.value)}">Ask AI about "${esc(this.value)}" →</div>`;
+  box.classList.add('show');
+});
+document.addEventListener('click', e=>{ if(!e.target.closest('#search-wrap')) document.getElementById('search-results').classList.remove('show'); });
+document.addEventListener('click', e=>{
+  if(e.target.closest('.sr-ask')){ document.getElementById('search-results').classList.remove('show'); document.getElementById('global-search').value=''; }
+});
+
+/* INIT */
+renderAll();
+</script>
+</body>
+</html>
